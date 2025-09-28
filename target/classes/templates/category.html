@@ -5,7 +5,7 @@
 
 <body>
 <div th:replace="~{fragments/header :: page-header}"></div>
-<main class="section">
+<main class="section img-loaded" >
     <div class="container">
         <h2 th:text="${#strings.capitalizeWords(categoryName)}">Category Name</h2>
         <div class="item-grid">

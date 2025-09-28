@@ -5,9 +5,9 @@
 
 <body>
 <div th:replace="~{fragments/header :: page-header}"></div>
-<main class="section">
+<main class="section img-loaded">
     <div class="container">
-        <h2>Our Menu</h2>
+        <h2 style="color: #f4f4f4">Our Menu</h2>
         <div class="category-grid">
             <a th:each="category : ${categories}"
                th:href="@{/menu/{cat}(cat=${category.toString().toLowerCase()})}"

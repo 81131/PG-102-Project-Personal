@@ -11,6 +11,10 @@ body {
     padding: 0 20px;
 }
 
+.img-loaded{
+    background: url('/images/home-page.jpg') no-repeat center center/cover;
+}
+
 /* Header & Navigation */
 header {
     background: #333;
