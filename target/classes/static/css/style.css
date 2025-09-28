@@ -1,0 +1,125 @@
+/* General Body Styles */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 0 20px;
+}
+
+/* Header & Navigation */
+header {
+    background: #333;
+    color: #fff;
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+header h1 {
+    margin: 0;
+}
+header nav {
+    display: flex;
+    align-items: center;
+}
+header nav ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    /* FIX #2: Add space between nav links and the welcome message */
+    margin-right: 30px;
+}
+header nav ul li {
+    margin-left: 20px;
+}
+header nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Login/Logout Button Styling */
+.btn-login {
+    background: #f7c08a;
+    color: #333;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: inline-block; /* Ensures padding and other properties work well */
+    border: none; /* Removes default button border */
+    cursor: pointer; /* Makes it look clickable */
+    text-align: center; /* Centers text inside the button */
+}
+/* FIX #1: Added a hover effect for better user feedback */
+.btn-login:hover {
+    background: #e7b07a;
+}
+
+/* Hero Section */
+.hero {
+    background: url('/images/home-page.jpg') no-repeat center center/cover;
+    height: 60vh;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.hero h2 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+/* General Section */
+.section {
+    padding: 60px 0;
+    text-align: center;
+}
+
+/* Menu & Category Grids */
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    text-align: center;
+}
+.category-link {
+    display: block;
+    padding: 40px 20px;
+    background: #fff;
+    text-decoration: none;
+    color: #333;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+.item-card {
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    text-align: left;
+}
+.item-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+.item-content {
+    padding: 15px;
+}

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: page-head(title='Our Menu')}"></head>
+
+<body>
+<div th:replace="~{fragments/header :: page-header}"></div>
+<main class="section">
+    <div class="container">
+        <h2>Our Menu</h2>
+        <div class="category-grid">
+            <a th:each="category : ${categories}"
+               th:href="@{/menu/{cat}(cat=${category.toString().toLowerCase()})}"
+               class="category-link">
+                <h3 th:text="${#strings.capitalizeWords(category.toString().toLowerCase().replace('_', ' '))}"></h3>
+            </a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

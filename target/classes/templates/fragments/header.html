@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<header th:fragment="page-header">
+    <div class="container">
+        <h1><a href="/" style="color: #fff; text-decoration: none;">Golden Flame Restaurant</a></h1>
+        <nav>
+            <ul>
+                <li><a href="/menu">Menu</a></li>
+                <li><a href="/events">Events</a></li>
+            </ul>
+
+            <div sec:authorize="isAnonymous()">
+                <a href="/login" class="btn-login">Login</a>
+            </div>
+
+            <div sec:authorize="isAuthenticated()" style="display: flex; align-items: center;">
+                <span style="margin-right: 15px;">Welcome, <strong sec:authentication="name">User</strong></span>
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <button type="submit" class="btn-login" style="background: #dc3545; color: white; border: none; cursor: pointer;">Logout</button>
+                </form>
+            </div>
+        </nav>
+    </div>
+</header>
+
+</body>
+</html>
