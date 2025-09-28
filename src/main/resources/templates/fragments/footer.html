@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<footer th:fragment="page-footer" class="site-footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-column">
+                <img th:src="@{/images/home-page.png}" alt="Golden Flame Logo" class="footer-logo">
+                <h4>Golden Flame Restaurant</h4>
+            </div>
+
+            <div class="footer-column">
+                <h4>About Us</h4>
+                <p>
+                    Serving our community with a passion for exquisite flavors and a commitment to providing an unforgettable fine dining experience for over a decade.
+                </p>
+            </div>
+
+            <div class="footer-column">
+                <h4>Contact Us</h4>
+                <ul class="contact-list">
+                    <li>Phone: +94 123 4567</li>
+                    <li>Email: manager@goldenflame.com</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Golden Flame Restaurant. All Rights Reserved.</p>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
