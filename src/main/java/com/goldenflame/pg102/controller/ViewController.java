@@ -7,8 +7,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 public class ViewController {
@@ -31,7 +34,12 @@ public class ViewController {
 
     @GetMapping("/menu")
     public String menu(Model model) {
-        model.addAttribute("categories", CatalogueItemType.values());
+        // Get all enum values, convert to a stream, and filter out EVENT_PACKAGE
+        List<CatalogueItemType> foodCategories = Arrays.stream(CatalogueItemType.values())
+                .filter(category -> category != CatalogueItemType.EVENT_PACKAGE)
+                .collect(Collectors.toList());
+
+        model.addAttribute("categories", foodCategories);
         return "menu";
     }
 
