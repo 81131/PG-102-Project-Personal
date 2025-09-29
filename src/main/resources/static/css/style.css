@@ -311,3 +311,31 @@ header nav ul li a {
     background-color: #f8d7da;
     border-color: #f5c6cb;
 }
+
+/* --- Cart Icon Styles --- */
+.cart-container {
+    position: relative; /* This is the positioning anchor for the badge */
+    margin-right: 20px;
+}
+
+.cart-icon {
+    width: 28px;  /* Adjust size as needed */
+    height: 28px;
+    vertical-align: middle; /* Aligns the icon nicely with the text */
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;   /* Positions the bubble on the top edge */
+    right: -8px; /* Positions the bubble on the right edge */
+    background-color: #dc3545; /* Red color for notifications */
+    color: white;
+    border-radius: 50%; /* Makes it a circle */
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

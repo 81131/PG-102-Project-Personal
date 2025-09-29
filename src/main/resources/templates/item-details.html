@@ -26,15 +26,18 @@
                     (<span th:text="${#lists.size(item.reviews)}">0</span> reviews)
                 </p>
                 <div sec:authorize="hasRole('ROLE_CUSTOMER')" style="margin-top: 20px;">
-                    <form th:action="@{/order/now}" method="post">
-                        <input type="hidden" name="itemId" th:value="${item.id}" />
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <label for="quantity">Quantity:</label>
-                            <input type="number" id="quantity" name="quantity" value="1" min="1" style="width: 60px; padding: 5px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <form th:action="@{/order/now}" method="post" style="display: flex; align-items: center; gap: 10px;">
+                            <input type="hidden" name="itemId" th:value="${item.id}" />
+                            <label for="quantity-now">Quantity:</label>
+                            <input type="number" id="quantity-now" name="quantity" value="1" min="1" style="width: 60px; padding: 5px;">
                             <button type="submit" class="btn-login">Order Now</button>
-                            <button type="button" class="btn-login" style="background-color: #6c757d;" disabled>Add to Cart</button>
-                        </div>
-                    </form>
+                        </form>
+                        <form th:action="@{/cart/add}" method="post">
+                            <input type="hidden" name="itemId" th:value="${item.id}" />
+                            <input type="hidden" name="quantity" value="1" /> <button type="submit" class="btn-login" style="background-color: #5a6268; color: white;">Add to Cart</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
