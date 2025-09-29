@@ -5,9 +5,11 @@ import com.goldenflame.pg102.model.CatalogueItemType;
 import com.goldenflame.pg102.repository.CatalogueItemRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CatalogueService {
+
 
     private final CatalogueItemRepository catalogueItemRepository;
 
@@ -21,5 +23,9 @@ public class CatalogueService {
 
     public List<CatalogueItem> getItemsByType(CatalogueItemType itemType) {
         return catalogueItemRepository.findByItemType(itemType);
+    }
+
+    public Optional<CatalogueItem> findById(Long id) {
+        return catalogueItemRepository.findById(id);
     }
 }

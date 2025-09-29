@@ -1,11 +1,14 @@
 package com.goldenflame.pg102.controller;
 
+import com.goldenflame.pg102.model.CatalogueItem;
 import com.goldenflame.pg102.model.CatalogueItemType;
 import com.goldenflame.pg102.service.CatalogueService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PathVariable;
+import java.util.Optional;
 
 @Controller
 public class ViewController {
@@ -49,5 +52,16 @@ public class ViewController {
         model.addAttribute("categoryName", "Event Packages");
         model.addAttribute("items", catalogueService.getItemsByType(CatalogueItemType.EVENT_PACKAGE));
         return "category";
+    }
+
+    @GetMapping("/item/{id}")
+    public String viewItemDetails(@PathVariable("id") Long id, Model model) {
+        Optional<CatalogueItem> itemOptional = catalogueService.findById(id);
+        if (itemOptional.isPresent()) {
+            model.addAttribute("item", itemOptional.get());
+            return "item-details"; // This will be our new template
+        } else {
+            return "redirect:/menu"; // If item not found, redirect to menu
+        }
     }
 }

@@ -40,11 +40,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        // --- THIS IS THE CHANGE ---
                         // Allow public access to static resources AND our public pages
                         .requestMatchers(
                                 "/", "/menu/**", "/events", "/login",
-                                "/css/**", "/js/**", "/images/**"
+                                "/css/**", "/js/**", "/images/**", "/item/**"
                         ).permitAll()
                         // Require authentication for all OTHER pages
                         .anyRequest().authenticated()

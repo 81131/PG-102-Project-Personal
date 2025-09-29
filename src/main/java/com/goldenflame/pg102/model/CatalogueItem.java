@@ -6,6 +6,8 @@ import java.util.OptionalDouble;
 
 @Entity
 @Table(name = "catalogue_items")
+
+
 public class CatalogueItem {
 
     @Id

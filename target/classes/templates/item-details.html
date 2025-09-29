@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: page-head(title=${item.name})}"></head>
+
+<body>
+<div th:replace="~{fragments/header :: page-header}"></div>
+
+<main class="section">
+    <div class="container">
+        <div class="item-details-grid">
+            <div class="item-image-container">
+                <img th:src="${#lists.isEmpty(item.photoUrls) ? '/images/default.jpg' : item.photoUrls.get(0)}" alt="Item image" />
+            </div>
+            <div class="item-info-container">
+                <h2 th:text="${item.name}">Item Name</h2>
+                <p th:text="${item.description}">Item description.</p>
+                <p><strong>Price:</strong> $<span th:text="${#numbers.formatDecimal(item.price, 1, 2)}">0.00</span></p>
+                <p>
+                    <strong>Average Rating:</strong>
+                    <span th:text="${#numbers.formatDecimal(item.getAverageRating(), 1, 1)}">0.0</span>/5
+                    (<span th:text="${#lists.size(item.reviews)}">0</span> reviews)
+                </p>
+            </div>
+        </div>
+
+        <div class="reviews-section">
+            <h3>Customer Reviews</h3>
+            <div th:if="${#lists.isEmpty(item.reviews)}">
+                <p>No reviews yet for this item.</p>
+            </div>
+            <div th:unless="${#lists.isEmpty(item.reviews)}" class="review-list">
+                <div th:each="review : ${item.reviews}" class="review-card">
+                    <p><strong>Rating:</strong> <span th:text="${review.score}">5</span>/5</p>
+                    <p th:if="${review.comment != null}" th:text="${review.comment}">A great review comment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+</body>
+</html>
