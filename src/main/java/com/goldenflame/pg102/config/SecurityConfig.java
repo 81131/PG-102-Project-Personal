@@ -47,6 +47,9 @@ public class SecurityConfig {
                         ).permitAll()
                         // Require authentication for all OTHER pages
                         .requestMatchers("/admin/**").hasRole("MANAGER")
+                        .requestMatchers("/kitchen/**").hasAnyRole("KITCHEN_SUPERVISOR", "KITCHEN_STAFF")
+                        .requestMatchers("/kitchen/**").hasAnyRole("KITCHEN_SUPERVISOR", "KITCHEN_STAFF")
+                        .requestMatchers("/api/notifications/**", "/notifications").authenticated()
                         .anyRequest().authenticated()
 
                 )
@@ -59,6 +62,8 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 );
+
+
         return http.build();
     }
 

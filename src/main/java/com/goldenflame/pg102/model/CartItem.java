@@ -1,10 +1,14 @@
 package com.goldenflame.pg102.model;
 
 import jakarta.persistence.*;
+import org.springframework.transaction.annotation.Transactional;
 
 @Entity
 @Table(name = "cart_items")
 public class CartItem {
+
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,6 +23,7 @@ public class CartItem {
 
     @Column(nullable = false)
     private int quantity;
+
 
     // Getters and Setters...
     public Long getId() { return id; }

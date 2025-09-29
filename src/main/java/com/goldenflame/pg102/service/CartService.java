@@ -63,4 +63,12 @@ public class CartService {
     public void removeItemFromCart(Long cartItemId) {
         cartItemRepository.deleteById(cartItemId);
     }
+
+    @Transactional
+    public void clearCart(User user) {
+        ShoppingCart cart = getCartForUser(user);
+        // Deleting all items from the list will trigger orphanRemoval
+        cart.getCartItems().clear();
+        cartRepository.save(cart);
+    }
 }

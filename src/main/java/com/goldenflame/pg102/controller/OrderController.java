@@ -1,6 +1,7 @@
 package com.goldenflame.pg102.controller;
 
 import com.goldenflame.pg102.model.CatalogueItem;
+import com.goldenflame.pg102.model.Order;
 import com.goldenflame.pg102.model.User;
 import com.goldenflame.pg102.repository.UserRepository;
 import com.goldenflame.pg102.service.CatalogueService;
@@ -13,6 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.GetMapping; // Add GetMapping import
+import java.util.List; // Add List import
+
 
 import java.util.Optional;
 
@@ -85,5 +89,13 @@ public class OrderController {
         orderService.createOrder(currentUser, item, quantity, address, phone, paymentMethod);
 
         return "redirect:/order/success";
+    }
+
+    @GetMapping("/my-history")
+    public String showOrderHistory(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        User currentUser = userRepository.findByUsername(userDetails.getUsername()).get();
+        List<Order> orders = orderService.findOrdersForUser(currentUser);
+        model.addAttribute("orders", orders);
+        return "my-history"; // This will be our new template
     }
 }

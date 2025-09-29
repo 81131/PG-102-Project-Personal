@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: page-head(title='Manage Orders')}"></head>
+<body>
+<div th:replace="~{fragments/header :: page-header}"></div>
+<main class="section">
+    <div class="container">
+        <h2>Active Orders</h2>
+        <table class="user-table">
+            <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Items</th>
+                <th>Status</th>
+                <th>Next Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="order : ${orders}">
+                <td th:text="${order.id}">1</td>
+                <td>
+                    <ul>
+                        <li th:each="item : ${order.orderItems}" th:text="${item.quantity} + 'x ' + ${item.catalogueItem.name}"></li>
+                    </ul>
+                </td>
+                <td th:text="${order.orderStatus}">PREPARING</td>
+                <td>
+                    <form th:action="@{/kitchen/orders/update-status}" method="post">
+                        <input type="hidden" name="orderId" th:value="${order.id}">
+                        <div th:if="${order.orderStatus == 'PREPARING'}">
+                            <button type="submit" name="status" value="PREPARED" class="btn-login">Mark as Prepared</button>
+                        </div>
+                        <div th:if="${order.orderStatus == 'PREPARED'}">
+                            <button type="submit" name="status" value="OUT_FOR_DELIVERY" class="btn-login">Mark as Out for Delivery</button>
+                        </div>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+</body>
+</html>
