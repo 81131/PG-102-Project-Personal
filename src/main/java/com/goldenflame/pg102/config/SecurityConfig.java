@@ -42,11 +42,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // Allow public access to static resources AND our public pages
                         .requestMatchers(
-                                "/", "/menu/**", "/events", "/login",
+                                "/", "/menu/**", "/events", "/login", "/register",
                                 "/css/**", "/js/**", "/images/**", "/item/**"
                         ).permitAll()
                         // Require authentication for all OTHER pages
+                        .requestMatchers("/admin/**").hasRole("MANAGER")
                         .anyRequest().authenticated()
+
                 )
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")

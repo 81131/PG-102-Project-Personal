@@ -7,6 +7,11 @@
 <div th:replace="~{fragments/header :: page-header}"></div>
 
 <main class="section">
+    <div th:if="${error}" class="container" style="margin-bottom: -40px;">
+        <div style="color: #721c24; background-color: #f8d7da; padding: 15px; border-radius: 5px;">
+            <p th:text="${error}" style="margin: 0;"></p>
+        </div>
+    </div>
     <div class="container">
         <div class="item-details-grid">
             <div class="item-image-container">
@@ -21,6 +26,17 @@
                     <span th:text="${#numbers.formatDecimal(item.getAverageRating(), 1, 1)}">0.0</span>/5
                     (<span th:text="${#lists.size(item.reviews)}">0</span> reviews)
                 </p>
+                <div sec:authorize="hasRole('ROLE_CUSTOMER')" style="margin-top: 20px;">
+                    <form th:action="@{/order/now}" method="post">
+                        <input type="hidden" name="itemId" th:value="${item.id}" />
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label for="quantity">Quantity:</label>
+                            <input type="number" id="quantity" name="quantity" value="1" min="1" style="width: 60px; padding: 5px;">
+                            <button type="submit" class="btn-login">Order Now</button>
+                            <button type="button" class="btn-login" style="background-color: #6c757d;" disabled>Add to Cart</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 

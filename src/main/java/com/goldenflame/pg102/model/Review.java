@@ -19,6 +19,10 @@ public class Review {
     @JoinColumn(name = "catalogue_item_id")
     private CatalogueItem catalogueItem;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     // Default constructor for JPA
     public Review() {}
 

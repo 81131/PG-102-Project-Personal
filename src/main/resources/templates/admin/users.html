@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: page-head(title='User Management')}"></head>
+<body>
+<div th:replace="~{fragments/header :: page-header}"></div>
+
+<main class="section">
+    <div class="container">
+        <h2>User Management</h2>
+
+        <div class="form-container" style="margin-bottom: 40px;">
+            <h3>Create New Staff Account</h3>
+            <form th:action="@{/admin/users/create}" method="post">
+                <input type="text" name="firstName" placeholder="First Name" required>
+                <input type="text" name="lastName" placeholder="Last Name" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="text" name="primaryPhoneNo" placeholder="Primary Phone No." required>
+                <input type="text" name="secondaryPhoneNo" placeholder="Secondary Phone No. (Optional)">
+                <input type="text" name="addressLine1" placeholder="Address Line 1" required>
+                <input type="text" name="addressLine2" placeholder="Address Line 2 (Optional)">
+                <input type="text" name="city" placeholder="City" required>
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Temporary Password" required>
+                <select name="roleId" required>
+                    <option value="">-- Select Role --</option>
+                    <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
+                </select>
+                <button type="submit" class="btn-login" style="margin-top: 15px;">Create User</button>
+            </form>
+        </div>
+
+        <h3>Existing Users</h3>
+        <div style="overflow-x:auto;"> <table class="user-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Primary Phone</th>
+                <th>Address</th>
+                <th>Role</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${users}">
+                <td th:text="${user.id}">1</td>
+                <td th:text="${user.username}">user</td>
+                <td th:text="${user.firstName + ' ' + user.lastName}">John Doe</td>
+                <td th:text="${user.email}">user@email.com</td>
+                <td th:text="${user.primaryPhoneNo}">0123456789</td>
+                <td th:text="${user.addressLine1 + ', ' + user.city}">123 Main St, City</td>
+                <td th:text="${user.role.name}">ROLE_USER</td>
+                <td>
+                    <form th:action="@{/admin/users/delete/{id}(id=${user.id})}" method="post">
+                        <button type="submit" class="btn-delete">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+</body>
+</html>

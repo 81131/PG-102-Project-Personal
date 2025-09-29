@@ -9,6 +9,9 @@
             <ul>
                 <li><a href="/menu">Menu</a></li>
                 <li><a href="/events">Events</a></li>
+                <li sec:authorize="hasRole('ROLE_MANAGER')">
+                    <a th:href="@{/admin/users}">Manage Users</a>
+                </li>
             </ul>
 
             <div sec:authorize="isAnonymous()">

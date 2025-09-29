@@ -72,4 +72,16 @@ public class ViewController {
             return "redirect:/menu"; // If item not found, redirect to menu
         }
     }
+
+    // Add to your ViewController class
+    @GetMapping("/register")
+    public String showRegistrationForm() {
+        return "register"; // The name of our new template
+    }
+
+
+    @GetMapping("/order/success")
+    public String orderSuccess() {
+        return "order-success";
+    }
 }
