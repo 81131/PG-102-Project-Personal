@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head th:replace="~{fragments/head :: page-head(title=${item.name})}"></head>
 
@@ -7,12 +7,11 @@
 <div th:replace="~{fragments/header :: page-header}"></div>
 
 <main class="section">
-    <div th:if="${error}" class="container" style="margin-bottom: -40px;">
-        <div style="color: #721c24; background-color: #f8d7da; padding: 15px; border-radius: 5px;">
+    <div class="container">
+        <div th:if="${error}" class="alert alert-danger">
             <p th:text="${error}" style="margin: 0;"></p>
         </div>
-    </div>
-    <div class="container">
+
         <div class="item-details-grid">
             <div class="item-image-container">
                 <img th:src="${#lists.isEmpty(item.photoUrls) ? '/images/default.jpg' : item.photoUrls.get(0)}" alt="Item image" />
@@ -41,16 +40,6 @@
         </div>
 
         <div class="reviews-section">
-            <h3>Customer Reviews</h3>
-            <div th:if="${#lists.isEmpty(item.reviews)}">
-                <p>No reviews yet for this item.</p>
-            </div>
-            <div th:unless="${#lists.isEmpty(item.reviews)}" class="review-list">
-                <div th:each="review : ${item.reviews}" class="review-card">
-                    <p><strong>Rating:</strong> <span th:text="${review.score}">5</span>/5</p>
-                    <p th:if="${review.comment != null}" th:text="${review.comment}">A great review comment.</p>
-                </div>
-            </div>
         </div>
     </div>
 </main>

@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     long countByOrderStatusIn(List<String> statuses); // To count active orders
-
+    List<Order> findByOrderStatusIn(List<String> statuses); // Find all orders with a given status
 }

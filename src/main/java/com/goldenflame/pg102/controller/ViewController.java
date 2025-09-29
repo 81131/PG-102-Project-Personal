@@ -80,6 +80,7 @@ public class ViewController {
     }
 
 
+    // Add this method to ViewController.java
     @GetMapping("/order/success")
     public String orderSuccess() {
         return "order-success";
