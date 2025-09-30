@@ -21,7 +21,7 @@ import java.util.List; // Add List import
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/order")
+@RequestMapping("/orders")
 public class OrderController {
 
     private final OrderService orderService;

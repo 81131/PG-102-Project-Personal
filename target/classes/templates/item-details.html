@@ -27,7 +27,7 @@
                 </p>
                 <div sec:authorize="hasRole('ROLE_CUSTOMER')" style="margin-top: 20px;">
                     <div style="display: flex; align-items: center; gap: 15px;">
-                        <form th:action="@{/order/now}" method="post" style="display: flex; align-items: center; gap: 10px;">
+                        <form th:action="@{/orders/now}" method="post" style="display: flex; align-items: center; gap: 10px;">
                             <input type="hidden" name="itemId" th:value="${item.id}" />
                             <label for="quantity-now">Quantity:</label>
                             <input type="number" id="quantity-now" name="quantity" value="1" min="1" style="width: 60px; padding: 5px;">
@@ -35,7 +35,8 @@
                         </form>
                         <form th:action="@{/cart/add}" method="post">
                             <input type="hidden" name="itemId" th:value="${item.id}" />
-                            <input type="hidden" name="quantity" value="1" /> <button type="submit" class="btn-login" style="background-color: #5a6268; color: white;">Add to Cart</button>
+                            <input type="hidden" name="quantity" value="1" />
+                            <button type="submit" class="btn-login" style="background-color: #5a6268; color: white;">Add to Cart</button>
                         </form>
                     </div>
                 </div>

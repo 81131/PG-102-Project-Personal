@@ -70,23 +70,35 @@ public class OrderService {
                 .isPresent();
     }
 
+
     @Transactional
     public Order createOrder(User user, CatalogueItem item, int quantity, String deliveryAddress, String deliveryPhone, String paymentMethod) {
+        // 1. Find an available delivery person
+        User assignedDeliveryPerson = findAvailableDeliveryPerson();
+
+        // 2. Create and save the Payment record
         Payment payment = new Payment();
         payment.setMethod(paymentMethod);
         payment.setAmount(item.getPrice() * quantity);
         payment.setPaymentDate(LocalDateTime.now());
-        payment.setStatus("COMPLETED");
+        if ("CASH_ON_DELIVERY".equals(paymentMethod)) {
+            payment.setStatus("PENDING");
+        } else {
+            payment.setStatus("COMPLETED");
+        }
         Payment savedPayment = paymentRepository.save(payment);
 
+        // 3. Create the Order
         Order order = new Order();
         order.setUser(user);
         order.setPayment(savedPayment);
+        order.setDeliveryPerson(assignedDeliveryPerson);
         order.setOrderStatus("PREPARING");
         order.setOrderDate(LocalDateTime.now());
         order.setDeliveryAddress(deliveryAddress);
         order.setDeliveryPhone(deliveryPhone);
 
+        // 4. Create the OrderItem
         OrderItem orderItem = new OrderItem();
         orderItem.setOrder(order);
         orderItem.setCatalogueItem(item);
@@ -94,16 +106,19 @@ public class OrderService {
         orderItem.setPricePerItem(item.getPrice());
         order.setOrderItems(List.of(orderItem));
 
+        // 5. Save the Order
         Order savedOrder = orderRepository.save(order);
 
-        notificationService.notifyKitchenStaff("New order #" + savedOrder.getId() + " received.", "/kitchen/orders");
-
+        // 6. Create Income Record
         Income income = new Income();
         income.setPayment(savedPayment);
         income.setAmount(savedPayment.getAmount());
         income.setIncomeType("FOOD_ORDER");
         income.setIncomeDate(LocalDate.now());
         incomeRepository.save(income);
+
+        // 7. Notify Kitchen Staff
+        notificationService.notifyKitchenStaff("New order #" + savedOrder.getId() + " received.", "/kitchen/orders");
 
         return savedOrder;
     }
@@ -113,9 +128,16 @@ public class OrderService {
         // 1. Create Payment
         Payment payment = new Payment();
         payment.setMethod(paymentMethod);
+
+        // Calculate the total amount from the cart, not a single item
         payment.setAmount(cart.getTotalPrice());
+
         payment.setPaymentDate(LocalDateTime.now());
-        payment.setStatus("COMPLETED");
+        if ("CASH_ON_DELIVERY".equals(paymentMethod)) {
+            payment.setStatus("PENDING");
+        } else {
+            payment.setStatus("COMPLETED");
+        }
         Payment savedPayment = paymentRepository.save(payment);
 
         // 2. Create Order
@@ -153,6 +175,9 @@ public class OrderService {
         // 5. Clear the user's shopping cart
         cartService.clearCart(user);
 
+        // 6. Notify Kitchen Staff
+        notificationService.notifyKitchenStaff("New order #" + savedOrder.getId() + " from cart received.", "/kitchen/orders");
+
         return savedOrder;
     }
 
@@ -165,12 +190,55 @@ public class OrderService {
         order.setOrderStatus(newStatus);
         orderRepository.save(order);
 
+        if ("OUT_FOR_DELIVERY".equals(newStatus)) {
+            User deliveryPerson = order.getDeliveryPerson();
+            if (deliveryPerson != null) {
+                String message = "New delivery task: Order #" + order.getId() + ". Address: " + order.getDeliveryAddress();
+                notificationService.createNotification(deliveryPerson, message, "/delivery/my-tasks");
+            }
+        }
+
         // Notify the customer
         String message = "Your order #" + order.getId() + " is now " + newStatus.toLowerCase() + ".";
         notificationService.createNotification(order.getUser(), message, "/orders/my-history"); // A future page for customers
+
     }
 
     public List<Order> findOrdersForUser(User user) {
         return orderRepository.findByUserOrderByOrderDateDesc(user);
+    }
+
+
+    @Transactional
+    public void completeOrderDelivery(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+        order.setOrderStatus("COMPLETED");
+
+        // If it was a COD order, update the payment status now
+        if ("CASH_ON_DELIVERY".equals(order.getPayment().getMethod())) {
+            Payment payment = order.getPayment();
+            payment.setStatus("COMPLETED");
+            paymentRepository.save(payment);
+        }
+
+        orderRepository.save(order);
+        notificationService.createNotification(order.getUser(), "Your order #" + order.getId() + " has been delivered!", "/orders/my-history");
+    }
+
+    @Transactional
+    public void cancelOrderDelivery(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+        // Safety check: only allow cancellation for COD
+        if ("CASH_ON_DELIVERY".equals(order.getPayment().getMethod())) {
+            order.setOrderStatus("CANCELLED");
+            orderRepository.save(order);
+
+            Payment payment = order.getPayment();
+            payment.setStatus("FAILED");
+            paymentRepository.save(payment);
+
+            notificationService.createNotification(order.getUser(), "Your order #" + order.getId() + " was cancelled during delivery.", "/orders/my-history");
+        }
+
     }
 }

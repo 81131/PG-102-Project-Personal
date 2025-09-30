@@ -15,6 +15,9 @@
                 <li sec:authorize="hasAnyRole('ROLE_KITCHEN_SUPERVISOR', 'ROLE_KITCHEN_STAFF')">
                     <a th:href="@{/kitchen/orders}">Manage Orders</a>
                 </li>
+                <li sec:authorize="hasRole('ROLE_DELIVERY_PERSON')">
+                    <a th:href="@{/delivery/my-tasks}">My Deliveries</a>
+                </li>
             </ul>
 
             <script sec:authorize="isAuthenticated()">

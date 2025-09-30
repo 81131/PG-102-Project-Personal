@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: page-head(title='My Deliveries')}"></head>
+<body>
+<div th:replace="~{fragments/header :: page-header}"></div>
+<main class="section">
+    <div class="container">
+        <h2>My Delivery Tasks</h2>
+        <div th:if="${#lists.isEmpty(orders)}">
+            <p>You have no active deliveries assigned.</p>
+        </div>
+        <div th:unless="${#lists.isEmpty(orders)}" class="order-history-list">
+            <div th:each="order : ${orders}" class="order-card">
+                <div class="order-card-header">
+                    <div>
+                        <strong>Order #<span th:text="${order.id}">123</span></strong>
+                        <p>Customer: <span th:text="${order.user.firstName + ' ' + order.user.lastName}"></span></p>
+                    </div>
+                    <div>
+                        <strong>Amount to Collect: $<span th:text="${#numbers.formatDecimal(order.payment.amount, 1, 2)}">0.00</span></strong>
+                        <p>Method: <span th:text="${order.payment.method}">COD</span></p>
+                    </div>
+                </div>
+                <div class="order-card-body">
+                    <h4>Delivery Info</h4>
+                    <p><strong>Address:</strong> <span th:text="${order.deliveryAddress}"></span></p>
+                    <p><strong>Phone:</strong> <span th:text="${order.deliveryPhone}"></span></p>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <form th:action="@{/delivery/complete}" method="post">
+                            <input type="hidden" name="orderId" th:value="${order.id}">
+                            <button type="submit" class="btn-login" style="background-color: #28a745;">Mark as Completed</button>
+                        </form>
+                        <form th:if="${order.payment.method == 'CASH_ON_DELIVERY'}" th:action="@{/delivery/cancel}" method="post">
+                            <input type="hidden" name="orderId" th:value="${order.id}">
+                            <button type="submit" class="btn-delete">Cancel (Payment Refused)</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+</body>
+</html>

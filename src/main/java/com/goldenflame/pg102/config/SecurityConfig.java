@@ -49,7 +49,10 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("MANAGER")
                         .requestMatchers("/kitchen/**").hasAnyRole("KITCHEN_SUPERVISOR", "KITCHEN_STAFF")
                         .requestMatchers("/kitchen/**").hasAnyRole("KITCHEN_SUPERVISOR", "KITCHEN_STAFF")
+                        .requestMatchers("/order/my-history").authenticated()
                         .requestMatchers("/api/notifications/**", "/notifications").authenticated()
+                        .requestMatchers("/delivery/**").hasRole("DELIVERY_PERSON")
+                        .requestMatchers("/orders/**").authenticated()
                         .anyRequest().authenticated()
 
                 )
