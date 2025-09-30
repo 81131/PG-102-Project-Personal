@@ -14,7 +14,7 @@
             <h4 style="margin-top: 15px;">Total: $<span th:text="${#numbers.formatDecimal(item.price * quantity, 1, 2)}">0.00</span></h4>
         </div>
 
-        <form th:action="@{/order/submit}" method="post" class="form-box">
+        <form th:action="@{/orders/submit}" method="post" class="form-box">
             <input type="hidden" name="itemId" th:value="${item.id}" />
             <input type="hidden" name="quantity" th:value="${quantity}" />
 
