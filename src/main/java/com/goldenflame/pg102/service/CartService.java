@@ -61,9 +61,18 @@ public class CartService {
 
     @Transactional
     public void removeItemFromCart(Long cartItemId) {
-        cartItemRepository.deleteById(cartItemId);
-    }
+        // Find the cart item
+        CartItem cartItem = cartItemRepository.findById(cartItemId).orElse(null);
 
+        if (cartItem != null) {
+            // Get the parent shopping cart
+            ShoppingCart cart = cartItem.getCart();
+            // Remove the item from the cart's list
+            cart.getCartItems().remove(cartItem);
+            // Save the cart, which will trigger the deletion of the orphaned cart item
+            cartRepository.save(cart);
+        }
+    }
     @Transactional
     public void clearCart(User user) {
         ShoppingCart cart = getCartForUser(user);
