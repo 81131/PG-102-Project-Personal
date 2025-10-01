@@ -3,9 +3,9 @@
 
 <head th:replace="~{fragments/head :: page-head(title='Login')}"></head>
 
-<body>
+<body class="img-loaded">
 <div th:replace="~{fragments/header :: page-header}"></div>
-<div class="container" style="max-width: 400px; margin-top: 50px;">
+<div class="container " style="max-width: 400px; margin-top: 50px;">
     <div style="background: #fff; padding: 30px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
         <div th:if="${param.registered}" style="color: #155724; background-color: #d4edda; padding: 10px; border-radius: 5px; margin-bottom: 15px;">
             Registration successful! Please sign in.
