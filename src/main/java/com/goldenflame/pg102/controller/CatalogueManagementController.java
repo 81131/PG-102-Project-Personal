@@ -35,7 +35,7 @@ public class CatalogueManagementController {
     public String showCatalogueManagementPage(Model model) {
         model.addAttribute("items", catalogueItemRepository.findAll());
         model.addAttribute("categories", categoryRepository.findAll());
-        return "kitchen/catalogue"; // The new template we will create
+        return "kitchen/catalogue";
     }
 
     @PostMapping("/add")
@@ -65,7 +65,7 @@ public class CatalogueManagementController {
         newItem.setName(name);
         newItem.setDescription(description);
         newItem.setPrice(price);
-        newItem.setBasePrice(basePrice); // Set the new field
+        newItem.setBasePrice(basePrice);
         newItem.setServingSizePerson(servingSizePerson);
         newItem.setCategory(category);
 

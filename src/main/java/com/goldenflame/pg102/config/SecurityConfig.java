@@ -45,6 +45,7 @@ public class SecurityConfig {
                                 "/", "/menu/**", "/events", "/login", "/register",
                                 "/css/**", "/js/**", "/images/**", "/item/**"
                         ).permitAll()
+
                         // Require authentication for all OTHER pages
                         .requestMatchers("/admin/**").hasRole("MANAGER")
                         .requestMatchers("/manager/**").hasRole("MANAGER")

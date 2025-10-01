@@ -26,7 +26,6 @@ public class CartController {
         this.orderService = orderService;
     }
 
-    // This makes the cart item count available to all templates
     @ModelAttribute("cartItemCount")
     public int getCartItemCount(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
@@ -42,7 +41,7 @@ public class CartController {
         User currentUser = userRepository.findByUsername(userDetails.getUsername()).get();
         ShoppingCart cart = cartService.getCartForUser(currentUser);
         model.addAttribute("cart", cart);
-        return "cart"; // New cart view template
+        return "cart";
     }
 
     @PostMapping("/add")
@@ -58,7 +57,6 @@ public class CartController {
         return "redirect:/cart";
     }
 
-    // NEW ENDPOINT for starting the checkout process
     @GetMapping("/checkout")
     public String checkout(Model model, @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes redirectAttributes) {
         // 1. Check for delivery person availability
@@ -73,10 +71,9 @@ public class CartController {
 
         model.addAttribute("cart", cart);
         model.addAttribute("currentUser", currentUser);
-        return "checkout-confirm"; // New checkout confirmation page
+        return "checkout-confirm";
     }
 
-    // NEW ENDPOINT to process the final cart order
     @PostMapping("/submit-order")
     public String submitCartOrder(@RequestParam String address,
                                   @RequestParam String phone,

@@ -21,10 +21,9 @@ public class AuthController {
                                       @RequestParam(required = false) String addressLine2, @RequestParam String city,
                                       @RequestParam String primaryPhoneNo, @RequestParam(required = false) String secondaryPhoneNo) {
 
-        // Note: Add validation here later (e.g., check if user exists)
         userService.registerCustomer(username, email, password, firstName, lastName, addressLine1,
                 addressLine2, city, primaryPhoneNo, secondaryPhoneNo);
 
-        return "redirect:/login?registered"; // Redirect to login with a success message
+        return "redirect:/login?registered";
     }
 }

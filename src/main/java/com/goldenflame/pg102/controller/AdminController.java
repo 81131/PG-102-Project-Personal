@@ -12,18 +12,18 @@ import com.goldenflame.pg102.repository.InventoryUsageLogRepository;
 public class AdminController {
 
     private final UserService userService;
-    private final InventoryUsageLogRepository inventoryUsageLogRepository; // Inject this
+    private final InventoryUsageLogRepository inventoryUsageLogRepository;
 
-    public AdminController(UserService userService, InventoryUsageLogRepository inventoryUsageLogRepository) { // Update constructor
+    public AdminController(UserService userService, InventoryUsageLogRepository inventoryUsageLogRepository) {
         this.userService = userService;
-        this.inventoryUsageLogRepository = inventoryUsageLogRepository; // Add this
+        this.inventoryUsageLogRepository = inventoryUsageLogRepository;
     }
 
     @GetMapping("/users")
     public String showUserManagementPage(Model model) {
         model.addAttribute("users", userService.findAllUsers());
         model.addAttribute("roles", userService.findAllRoles());
-        return "admin/users"; // Path to the new Thymeleaf template
+        return "admin/users";
     }
 
     @PostMapping("/users/create")
@@ -49,7 +49,6 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
-    // ADD THIS NEW METHOD
     @GetMapping("/inventory-logs")
     public String showInventoryLogs(Model model) {
         model.addAttribute("logs", inventoryUsageLogRepository.findAllByOrderByUsageDateDesc());
