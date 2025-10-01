@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: page-head(title=${item.name + ' Reviews'})}"></head>
+<body>
+<div th:replace="~{fragments/header :: page-header}"></div>
+
+<main class="section">
+    <div class="container" style="max-width: 800px; text-align: left;">
+        <h2>Reviews for <span th:text="${item.name}">Item Name</span></h2>
+
+        <div th:if="${success}" class="alert" style="background-color: #d4edda; color: #155724;" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <div sec:authorize="isAuthenticated()" th:if="${!#maps.isEmpty(reviewableItems)}" class="form-container" style="margin-bottom: 40px;">
+            <h4>Write Your Review</h4>
+            <p>You can review this item based on your recent completed orders.</p>
+            <form th:action="@{/reviews/submit}" method="post">
+                <label>Select an Order to Review:</label>
+                <select name="orderItemId" required>
+                    <option th:each="entry : ${reviewableItems}" th:value="${entry.value.id}" th:text="'Order #' + ${entry.key}"></option>
+                </select>
+
+                <label style="margin-top: 15px; display: block;">Your Rating:</label>
+                <div class="star-rating-form">
+                    <input type="radio" id="star5" name="score" value="5" required/><label for="star5">★</label>
+                    <input type="radio" id="star4" name="score" value="4"/><label for="star4">★</label>
+                    <input type="radio" id="star3" name="score" value="3"/><label for="star3">★</label>
+                    <input type="radio" id="star2" name="score" value="2"/><label for="star2">★</label>
+                    <input type="radio" id="star1" name="score" value="1"/><label for="star1">★</label>
+                </div>
+
+                <label style="margin-top: 15px; display: block;">Your Comment (Optional):</label>
+                <textarea name="comment" rows="4" placeholder="Share your thoughts..."></textarea>
+                <button type="submit" class="btn-login" style="margin-top: 15px;">Submit Review</button>
+            </form>
+        </div>
+
+        <div class="review-list">
+            <div th:if="${#lists.isEmpty(reviews)}">
+                <p>No reviews yet for this item.</p>
+            </div>
+            <div th:each="review : ${reviews}" class="review-card">
+                <p class="star-rating">
+                    <span th:text="${review.score}">5</span>/5 ★
+                    <strong style="margin-left: 15px; color: #333;" th:text="${review.user.firstName}">User</strong>
+                </p>
+                <p th:if="${review.commentStatus == 'VISIBLE' and review.comment != null and !review.comment.isBlank()}" th:text="${review.comment}">Comment text.</p>
+                <p th:if="${review.commentStatus == 'REMOVED'}" style="color: #6c757d; font-style: italic;">[Comment removed by moderator]</p>
+
+                <div th:if="${review.managerReply != null and !review.managerReply.isBlank()}" style="margin-left: 20px; border-left: 3px solid #f7c08a; padding-left: 15px; margin-top: 10px;">
+                    <p style="font-weight: bold; margin-bottom: 5px;">Reply from Golden Flame:</p>
+                    <p th:text="${review.managerReply}" style="margin: 0;"></p>
+                </div>
+
+                <small style="color: #6c757d;" th:text="${'Reviewed on ' + #temporals.format(review.reviewDate, 'dd-MMM-yyyy')}">Date</small>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+</body>
+</html>

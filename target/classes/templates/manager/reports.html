@@ -1,64 +1,155 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: page-head(title='Financial Reports')}"></head>
+<head>
+    <head th:replace="~{fragments/head :: page-head(title='Financial Reports')}"></head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
 <body>
 <div th:replace="~{fragments/header :: page-header}"></div>
 
 <main class="section">
     <div class="container" style="text-align: left;">
-        <h2>Financial Reports</h2>
+        <h2>Financial Dashboard</h2>
+
+        <div th:if="${success}" class="alert" style="background-color: #d4edda; color: #155724;" th:text="${success}"></div>
 
         <div class="form-container" style="margin-bottom: 40px;">
-            <h3>Income Report</h3>
-            <p>View income from completed orders and other sources.</p>
+            <h4>Select Date Range</h4>
+            <form th:action="@{/manager/reports}" method="get">
+                <div style="display: grid; grid-template-columns: 1fr 1fr  auto; gap: 15px; align-items: flex-end;">
+                    <div>
+                        <label for="startDate">Start Date</label>
+                        <input type="date" id="startDate" name="startDate" th:value="${startDate}" required>
+                    </div>
+                    <div>
+                        <label for="endDate">End Date</label>
+                        <input type="date" id="endDate" name="endDate" th:value="${endDate}" required>
+                    </div>
+                    <button type="submit" class="btn-login">Generate Report</button>
+                </div>
+            </form>
+        </div>
 
-            <div style="margin-bottom: 20px; display: flex; gap: 10px;">
-                <a th:href="@{/manager/reports(period='daily')}" class="btn-login" th:classappend="${selectedPeriod == 'daily' ? '' : 'btn-secondary'}">Today</a>
-                <a th:href="@{/manager/reports(period='weekly')}" class="btn-login" th:classappend="${selectedPeriod == 'weekly' ? '' : 'btn-secondary'}">This Week</a>
-                <a th:href="@{/manager/reports(period='monthly')}" class="btn-login" th:classappend="${selectedPeriod == 'monthly' ? '' : 'btn-secondary'}">This Month</a>
+        <div class="form-container" style="margin-bottom: 40px;">
+            <h4>Record Manual Expense</h4>
+            <form th:action="@{/manager/reports/expense/add}" method="post">
+                <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 15px; align-items: flex-end;">
+                    <input type="text" name="description" placeholder="Expense Description (e.g., January Salaries)" required>
+                    <input type="number" name="amount" placeholder="Amount ($)" step="0.01" required>
+                    <input type="date" name="expenseDate" required>
+                    <select name="category" required>
+                        <option value="Salary">Salary</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Rent">Rent</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <button type="submit" class="btn-login">Record Expense</button>
+                </div>
+            </form>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px;">
+            <div class="form-container">
+                <h3>Financial Summary</h3>
+                <h4 style="color: #28a745;">Total Income: <span th:text="'$' + ${#numbers.formatDecimal(totalIncome, 1, 2)}"></span></h4>
+                <h4 style="color: #dc3545;">Total Expenses: <span th:text="'$' + ${#numbers.formatDecimal(totalExpenses, 1, 2)}"></span></h4>
+                <hr/>
+                <h3 th:style="${netProfit >= 0 ? 'color: #28a745;' : 'color: #dc3545;'}">
+                    Net Profit: <span th:text="'$' + ${#numbers.formatDecimal(netProfit, 1, 2)}"></span>
+                </h3>
+                <canvas id="incomeVsExpenseChart"></canvas>
             </div>
-
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-                <h4>Total Income for Period: <span style="color: #28a745;" th:text="'$' + ${#numbers.formatDecimal(totalIncome, 1, 2)}">$0.00</span></h4>
-            </div>
-
-            <div style="overflow-x:auto;">
-                <table class="user-table">
-                    <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Payment ID</th>
-                        <th>Income Type</th>
-                        <th>Amount</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:if="${#lists.isEmpty(incomeList)}">
-                        <td colspan="4" style="text-align: center;">No income recorded for this period.</td>
-                    </tr>
-                    <tr th:each="income : ${incomeList}">
-                        <td th:text="${#temporals.format(income.incomeDate, 'dd-MMM-yyyy')}">Date</td>
-                        <td th:text="${income.payment.id}">Payment ID</td>
-                        <td th:text="${income.incomeType}">FOOD_ORDER</td>
-                        <td th:text="'$' + ${#numbers.formatDecimal(income.amount, 1, 2)}">$0.00</td>
-                    </tr>
-                    </tbody>
-                </table>
+            <div class="form-container">
+                <h3>Income by Source</h3>
+                <canvas id="incomeDiversityChart"></canvas>
             </div>
         </div>
 
-        <div class="form-container" style="opacity: 0.5;">
-            <h3>Income vs. Expense Report</h3>
-            <p>This feature is coming soon.</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+            <div class="form-container">
+                <h4>Income Records</h4>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="user-table">
+                        <thead><tr><th>Date</th><th>Type</th><th>Amount</th></tr></thead>
+                        <tbody>
+                        <tr th:each="income : ${incomeList}"><td th:text="${#temporals.format(income.incomeDate, 'dd-MMM')}"></td><td th:text="${income.incomeType}"></td><td th:text="'$' + ${#numbers.formatDecimal(income.amount, 1, 2)}"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="form-container">
+                <h4>Expense Records</h4>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="user-table">
+                        <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th></tr></thead>
+                        <tbody>
+                        <tr th:each="purchase : ${purchaseExpenses}"><td th:text="${#temporals.format(purchase.purchaseDate, 'dd-MMM')}"></td><td>Inventory</td><td th:text="${purchase.inventoryItem.name}"></td><td th:text="'$' + ${#numbers.formatDecimal(purchase.quantityPurchased * purchase.unitPrice, 1, 2)}"></td></tr>
+                        <tr th:each="expense : ${manualExpenses}"><td th:text="${#temporals.format(expense.expenseDate, 'dd-MMM')}"></td><td th:text="${expense.category}"></td><td th:text="${expense.description}"></td><td th:text="'$' + ${#numbers.formatDecimal(expense.amount, 1, 2)}"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-
     </div>
 </main>
-<style>
-    .btn-secondary { background-color: #6c757d; color: white; }
-    .btn-secondary:hover { background-color: #5a6268; }
-</style>
-
 <div th:replace="~{fragments/footer :: page-footer}"></div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener("DOMContentLoaded", function() {
+        // Data from the Spring Boot model
+        const totalIncome = /*[[${totalIncome}]]*/ 0;
+        const totalExpenses = /*[[${totalExpenses}]]*/ 0;
+        const incomeByType = /*[[${incomeByType}]]*/ {};
+
+        // 1. Income vs Expense Pie Chart
+        const pieCtx = document.getElementById('incomeVsExpenseChart').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Total Income', 'Total Expenses'],
+                datasets: [{
+                    data: [totalIncome, totalExpenses],
+                    backgroundColor: ['#28a745', '#dc3545'],
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: 'Income vs. Expenses' }
+                }
+            }
+        });
+
+        // 2. Income Diversity Bar Chart
+        const barCtx = document.getElementById('incomeDiversityChart').getContext('2d');
+        const labels = Object.keys(incomeByType);
+        const data = Object.values(incomeByType);
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Income ($)',
+                    data: data,
+                    backgroundColor: ['#007bff', '#ffc107', '#28a745', '#fd7e14']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    });
+    /*]]>*/
+</script>
+
 </body>
 </html>

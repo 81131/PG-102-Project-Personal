@@ -208,13 +208,11 @@ public class OrderService {
         return orderRepository.findByUserOrderByOrderDateDesc(user);
     }
 
-
     @Transactional
     public void completeOrderDelivery(Long orderId) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
         order.setOrderStatus("COMPLETED");
 
-        // If it was a COD order, update the payment status now
         if ("CASH_ON_DELIVERY".equals(order.getPayment().getMethod())) {
             Payment payment = order.getPayment();
             payment.setStatus("COMPLETED");
@@ -222,7 +220,18 @@ public class OrderService {
         }
 
         orderRepository.save(order);
-        notificationService.createNotification(order.getUser(), "Your order #" + order.getId() + " has been delivered!", "/orders/my-history");
+
+        // --- NEW NOTIFICATION LOGIC ---
+        // 1. Notify that the order has been delivered
+        notificationService.createNotification(order.getUser(),
+                "Your order #" + order.getId() + " has been delivered! Thank you for your purchase.",
+                "/orders/my-history");
+
+        // 2. Notify and ask for a review
+        notificationService.createNotification(order.getUser(),
+                "Enjoyed your meal? Please leave a review for order #" + order.getId(),
+                "/orders/my-history");
+        // --- END NEW LOGIC ---
     }
 
     @Transactional

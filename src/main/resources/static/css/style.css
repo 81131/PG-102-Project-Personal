@@ -501,3 +501,27 @@ header nav ul li a {
     color: #155724;
     font-weight: bold;
 }
+
+.star-rating {
+    display: flex;
+    align-items: center;
+    font-size: 1.2em;
+    color: #fdcc0d;
+}
+.star-rating-form {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+.star-rating-form input { display: none; }
+.star-rating-form label {
+    font-size: 2em;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.star-rating-form input:checked ~ label,
+.star-rating-form label:hover,
+.star-rating-form label:hover ~ label {
+    color: #fdcc0d;
+}

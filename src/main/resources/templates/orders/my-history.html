@@ -26,10 +26,15 @@
                 </div>
                 <div class="order-card-body">
                     <h4>Items:</h4>
+                    <h4>Items:</h4>
                     <ul>
-                        <li th:each="item : ${order.orderItems}"
-                            th:text="${item.quantity} + 'x ' + ${item.catalogueItem.name}">
-                            1x Item Name
+                        <li th:each="item : ${order.orderItems}" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span th:text="${item.quantity} + 'x ' + ${item.catalogueItem.name}">1x Item Name</span>
+
+                            <div th:if="${order.orderStatus == 'COMPLETED'}">
+                                <a th:if="${item.review == null}" th:href="@{/item/{id}/reviews(id=${item.catalogueItem.id})}" class="btn-login" style="padding: 5px 10px;">Leave a Review</a>
+                                <a th:if="${item.review != null}" th:href="@{/item/{id}/reviews(id=${item.catalogueItem.id})}" class="btn-login btn-secondary" style="padding: 5px 10px;">Edit Your Review</a>
+                            </div>
                         </li>
                     </ul>
                 </div>

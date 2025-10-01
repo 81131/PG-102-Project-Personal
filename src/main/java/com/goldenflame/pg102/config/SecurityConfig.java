@@ -58,6 +58,8 @@ public class SecurityConfig {
                         .requestMatchers("/events/book/**").authenticated()
                         .requestMatchers("/events/manage/**").hasRole("EVENT_COORDINATOR")
                         .requestMatchers("/orders/**").authenticated()
+                        .requestMatchers("/reviews/submit").authenticated()
+                        .requestMatchers("/cart/**").authenticated()
                         .anyRequest().authenticated()
 
                 )

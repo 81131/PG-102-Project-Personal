@@ -4,18 +4,45 @@
 <body>
 <div th:replace="~{fragments/header :: page-header}"></div>
 <main class="section">
-    <div class="container">
+    <div class="container" style="text-align: left;">
         <h2>Your Shopping Cart</h2>
 
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
         <div th:if="${cart == null or #lists.isEmpty(cart.cartItems)}">
             <p>Your cart is empty.</p>
+            <a th:href="@{/menu}" class="btn-login" style="margin-top: 20px;">Continue Shopping</a>
         </div>
+
         <div th:unless="${cart == null or #lists.isEmpty(cart.cartItems)}">
+            <table class="user-table" style="margin-top: 20px;">
+                <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="cartItem : ${cart.cartItems}">
+                    <td th:text="${cartItem.catalogueItem.name}">Item Name</td>
+                    <td th:text="'$' + ${#numbers.formatDecimal(cartItem.catalogueItem.price, 1, 2)}">$0.00</td>
+                    <td th:text="${cartItem.quantity}">1</td>
+                    <td th:text="'$' + ${#numbers.formatDecimal(cartItem.catalogueItem.price * cartItem.quantity, 1, 2)}">$0.00</td>
+                    <td>
+                        <form th:action="@{/cart/remove/{cartItemId}(cartItemId=${cartItem.id})}" method="post">
+                            <button type="submit" class="btn-delete">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
             <div style="text-align: right; margin-top: 20px;">
                 <h3>Total: <span th:text="'$' + ${#numbers.formatDecimal(cart.totalPrice, 1, 2)}">$0.00</span></h3>
-                <a th:href="@{/cart/checkout}" class="btn-login">Proceed to Checkout</a>
+                <a th:href="@{/cart/checkout}" class="btn-login" style="background-color: #28a745;">Proceed to Checkout</a>
             </div>
         </div>
     </div>

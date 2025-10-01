@@ -1,15 +1,16 @@
 package com.goldenflame.pg102.controller;
 
-import com.goldenflame.pg102.model.CatalogueItem;
-import com.goldenflame.pg102.model.CatalogueItemType;
-import com.goldenflame.pg102.model.Category;
-import com.goldenflame.pg102.repository.CategoryRepository;
+import com.goldenflame.pg102.model.*;
+import com.goldenflame.pg102.repository.*;
 import com.goldenflame.pg102.service.CatalogueService;
-import com.goldenflame.pg102.repository.EventBookingRepository; // Import this
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import java.util.Map;
+import java.util.function.Function;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -23,12 +24,18 @@ public class ViewController {
     private final CatalogueService catalogueService;
     private final CategoryRepository categoryRepository;
     private final EventBookingRepository eventBookingRepository; // Inject this
+    private final ReviewRepository reviewRepository;
+    private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
 
 
-    public ViewController(CatalogueService catalogueService, CategoryRepository categoryRepository, EventBookingRepository eventBookingRepository) {
+    public ViewController(CatalogueService catalogueService, CategoryRepository categoryRepository, EventBookingRepository eventBookingRepository, ReviewRepository reviewRepository, OrderRepository orderRepository, UserRepository userRepository) {
         this.catalogueService = catalogueService;
         this.categoryRepository = categoryRepository;
         this.eventBookingRepository = eventBookingRepository; // Add this
+        this.reviewRepository = reviewRepository;
+        this.orderRepository = orderRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/login")
@@ -110,6 +117,8 @@ public class ViewController {
         }
     }
 
+
+
     // Add to your ViewController class
     @GetMapping("/register")
     public String showRegistrationForm() {
@@ -121,5 +130,34 @@ public class ViewController {
     @GetMapping("/order/success")
     public String orderSuccess() {
         return "order-success";
+    }
+
+    @GetMapping("/item/{id}/reviews")
+    public String showItemReviews(@PathVariable("id") Long id, Model model) {
+        Optional<CatalogueItem> itemOptional = catalogueService.findById(id);
+        if (itemOptional.isEmpty()) {
+            return "redirect:/menu";
+        }
+        CatalogueItem item = itemOptional.get();
+        model.addAttribute("item", item);
+
+        List<Review> reviews = reviewRepository.findByCatalogueItemIdOrderByReviewDateDesc(id);
+        model.addAttribute("reviews", reviews);
+
+        // Logic to find which items the current user can review
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Map<Long, OrderItem> reviewableItems = Map.of();
+
+        if (principal instanceof UserDetails) {
+            User currentUser = userRepository.findByUsername(((UserDetails) principal).getUsername()).orElseThrow();
+            reviewableItems = orderRepository.findByUserOrderByOrderDateDesc(currentUser).stream()
+                    .filter(order -> "COMPLETED".equals(order.getOrderStatus()))
+                    .flatMap(order -> order.getOrderItems().stream())
+                    .filter(orderItem -> orderItem.getCatalogueItem().getId().equals(id) && orderItem.getReview() == null)
+                    .collect(Collectors.toMap(orderItem -> orderItem.getOrder().getId(), Function.identity(), (first, second) -> first));
+        }
+        model.addAttribute("reviewableItems", reviewableItems);
+
+        return "reviews"; // The new template
     }
 }
