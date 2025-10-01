@@ -25,6 +25,9 @@
                     <a th:href="@{/inventory}">Inventory</a>
                 </li>
                 <li sec:authorize="hasRole('ROLE_MANAGER')">
+                    <a th:href="@{/admin/reviews}">Moderate Reviews</a>
+                </li>
+                <li sec:authorize="hasRole('ROLE_MANAGER')">
                     <a th:href="@{/manager/reports}">Financial Reports</a>
                 </li>
                 <li sec:authorize="hasRole('ROLE_EVENT_COORDINATOR')">

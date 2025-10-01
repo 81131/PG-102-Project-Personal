@@ -8,7 +8,7 @@
     <div class="container" style="max-width: 800px; text-align: left;">
         <h2>Confirm Your Checkout</h2>
 
-        <div th_if="${error}" class="alert alert-danger" th:text="${error}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
         <div class="form-box" style="margin-bottom: 30px;">
             <h4>Order Summary</h4>
@@ -24,9 +24,53 @@
         </div>
 
         <form th:action="@{/cart/submit-order}" method="post" class="form-box">
+            <h4>Delivery Details</h4>
+            <p>Enter your delivery address or use the one from your account.</p>
+            <div class="form-grid">
+                <div class="grid-full-width">
+                    <label for="address">Delivery Address</label>
+                    <input type="text" id="address" name="address" th:value="${currentUser.addressLine1 + ', ' + currentUser.city}" required>
+                </div>
+                <div class="grid-full-width">
+                    <label for="phone">Contact Phone</label>
+                    <input type="text" id="phone" name="phone" th:value="${currentUser.primaryPhoneNo}" required>
+                </div>
+            </div>
+
+            <h4 style="margin-top: 30px;">Payment Method</h4>
+            <select name="paymentMethod" required onchange="toggleCardDetails(this.value)">
+                <option value="CASH_ON_DELIVERY">Cash on Delivery</option>
+                <option value="CARD">Credit/Debit Card</option>
+            </select>
+
+            <div id="card-details" style="display:none; margin-top: 20px;" class="form-grid">
+                <div><label>Card Number</label><input type="text" name="cardNumber" placeholder="5040705240328972"></div>
+                <div><label>CVC</label><input type="text" name="cvc" placeholder="123"></div>
+                <div><label>Expiry Month</label><input type="number" name="expiryMonth" placeholder="12"></div>
+                <div><label>Expiry Year</label><input type="number" name="expiryYear" placeholder="2028"></div>
+            </div>
+
+            <button type="submit" class="btn-login" style="width: 100%; margin-top: 30px;">Place Final Order</button>
         </form>
     </div>
 </main>
+
 <div th:replace="~{fragments/footer :: page-footer}"></div>
+
+<script>
+    function toggleCardDetails(paymentMethod) {
+        const cardDetails = document.getElementById('card-details');
+        if (paymentMethod === 'CARD') {
+            cardDetails.style.display = 'grid';
+            // Make card inputs required when visible
+            cardDetails.querySelectorAll('input').forEach(input => input.required = true);
+        } else {
+            cardDetails.style.display = 'none';
+            // Make card inputs not required when hidden
+            cardDetails.querySelectorAll('input').forEach(input => input.required = false);
+        }
+    }
+</script>
+
 </body>
 </html>

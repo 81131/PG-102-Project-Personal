@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface EventBookingRepository extends JpaRepository<EventBooking, Long> {
-    // Find all bookings, ordered by the most recent first
     List<EventBooking> findAllByOrderByEventDateTimeDesc();
 
     List<EventBooking> findByUserOrderByEventDateTimeDesc(User user);

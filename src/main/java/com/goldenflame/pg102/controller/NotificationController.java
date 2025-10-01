@@ -16,7 +16,7 @@ import java.util.List;
 
 import java.util.Map;
 @Controller
-@RequestMapping("/notifications") // Changed to a standard controller with a base path
+@RequestMapping("/notifications")
 public class NotificationController {
 
     private final NotificationService notificationService;
@@ -27,12 +27,11 @@ public class NotificationController {
         this.userRepository = userRepository;
     }
 
-    // This method shows the page with all notifications
     @GetMapping
     public String showNotifications(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         User currentUser = userRepository.findByUsername(userDetails.getUsername()).get();
         List<Notification> notifications = notificationService.getAndMarkAllAsRead(currentUser);
         model.addAttribute("notifications", notifications);
-        return "notifications"; // This will be our new template
+        return "notifications";
     }
 }

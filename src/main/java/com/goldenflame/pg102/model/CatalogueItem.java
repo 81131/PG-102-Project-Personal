@@ -28,12 +28,12 @@ public class CatalogueItem {
     @OneToMany(mappedBy = "catalogueItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 
-    // --- This is the new field that replaces itemType ---
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
 
-    // --- Methods and Getters/Setters ---
+
 
     public CatalogueItem() {}
 
@@ -67,7 +67,6 @@ public class CatalogueItem {
     public List<Review> getReviews() { return reviews; }
     public void setReviews(List<Review> reviews) { this.reviews = reviews; }
 
-    // Getter and Setter for the new Category field
     public Category getCategory() { return category; }
     public void setCategory(Category category) { this.category = category; }
 }

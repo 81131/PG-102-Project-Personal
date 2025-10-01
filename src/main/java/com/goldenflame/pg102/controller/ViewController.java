@@ -23,7 +23,7 @@ public class ViewController {
 
     private final CatalogueService catalogueService;
     private final CategoryRepository categoryRepository;
-    private final EventBookingRepository eventBookingRepository; // Inject this
+    private final EventBookingRepository eventBookingRepository;
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
@@ -32,7 +32,7 @@ public class ViewController {
     public ViewController(CatalogueService catalogueService, CategoryRepository categoryRepository, EventBookingRepository eventBookingRepository, ReviewRepository reviewRepository, OrderRepository orderRepository, UserRepository userRepository) {
         this.catalogueService = catalogueService;
         this.categoryRepository = categoryRepository;
-        this.eventBookingRepository = eventBookingRepository; // Add this
+        this.eventBookingRepository = eventBookingRepository;
         this.reviewRepository = reviewRepository;
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
@@ -51,13 +51,12 @@ public class ViewController {
 
     @GetMapping("/menu")
     public String menu(Model model) {
-        // Fetch only FOOD categories for the menu page by excluding all other types
         List<Category> foodCategories = categoryRepository.findAll().stream()
                 .filter(category -> {
                     String lowerCaseName = category.getName().toLowerCase();
                     return !lowerCaseName.contains("event") &&
                             !lowerCaseName.contains("parties") &&
-                            !lowerCaseName.startsWith("inventory"); // <-- ADD THIS LINE
+                            !lowerCaseName.startsWith("inventory");
                 })
                 .collect(Collectors.toList());
 
@@ -84,12 +83,12 @@ public class ViewController {
                 .filter(category -> category.getName().toLowerCase().contains("event") || category.getName().toLowerCase().contains("parties"))
                 .collect(Collectors.toList());
         model.addAttribute("categories", eventCategories);
-        return "events/event-categories"; // Use a new template to show event categories
+        return "events/event-categories";
     }
 
     @GetMapping("/events/{categoryName}")
     public String viewEventPackages(@PathVariable("categoryName") String categoryName, Model model) {
-        return viewCategory(categoryName, model); // Reuse the same logic as the food category page
+        return viewCategory(categoryName, model);
     }
 
     @GetMapping("/item/{id}")
@@ -100,17 +99,17 @@ public class ViewController {
             model.addAttribute("item", item);
 
             String categoryName = item.getCategory().getName().toLowerCase();
+
             // Check if it's an event package
             if (categoryName.contains("event") || categoryName.contains("parties")) {
-                // Fetch unavailable dates for the calendar
                 List<LocalDate> unavailableDates = eventBookingRepository.findAll().stream()
                         .filter(booking -> !booking.getStatus().equals("CANCELLED") && !booking.getStatus().equals("REJECTED"))
                         .map(booking -> booking.getEventDateTime().toLocalDate())
                         .collect(Collectors.toList());
                 model.addAttribute("unavailableDates", unavailableDates);
-                return "events/event-details"; // Show the special event details page
+                return "events/event-details";
             } else {
-                return "item-details"; // Show the normal food details page
+                return "item-details";
             }
         } else {
             return "redirect:/menu";
@@ -119,14 +118,13 @@ public class ViewController {
 
 
 
-    // Add to your ViewController class
+
     @GetMapping("/register")
     public String showRegistrationForm() {
-        return "register"; // The name of our new template
+        return "register";
     }
 
 
-    // Add this method to ViewController.java
     @GetMapping("/order/success")
     public String orderSuccess() {
         return "order-success";
@@ -144,7 +142,6 @@ public class ViewController {
         List<Review> reviews = reviewRepository.findByCatalogueItemIdOrderByReviewDateDesc(id);
         model.addAttribute("reviews", reviews);
 
-        // Logic to find which items the current user can review
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Map<Long, OrderItem> reviewableItems = Map.of();
 
@@ -158,6 +155,6 @@ public class ViewController {
         }
         model.addAttribute("reviewableItems", reviewableItems);
 
-        return "reviews"; // The new template
+        return "reviews";
     }
 }

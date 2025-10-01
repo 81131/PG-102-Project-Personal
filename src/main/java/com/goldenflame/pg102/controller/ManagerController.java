@@ -71,7 +71,7 @@ public class ManagerController {
         model.addAttribute("totalIncome", totalIncome);
         model.addAttribute("totalExpenses", totalExpenses);
         model.addAttribute("netProfit", netProfit);
-        model.addAttribute("incomeByType", incomeByType); // For the bar chart
+        model.addAttribute("incomeByType", incomeByType);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
 

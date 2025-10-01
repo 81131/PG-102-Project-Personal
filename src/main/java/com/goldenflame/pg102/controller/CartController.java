@@ -71,7 +71,7 @@ public class CartController {
 
         model.addAttribute("cart", cart);
         model.addAttribute("currentUser", currentUser);
-        return "checkout-confirm";
+        return "checkout-confirmation";
     }
 
     @PostMapping("/submit-order")

@@ -7,7 +7,5 @@ import java.util.List;
 
 public interface InventoryPurchaseRepository extends JpaRepository<InventoryPurchase, Long> {
     List<InventoryPurchase> findByExpiryDateBetween(LocalDate start, LocalDate end);
-
-    // ADD THIS MISSING METHOD
     List<InventoryPurchase> findByPurchaseDateBetweenOrderByPurchaseDateDesc(LocalDate startDate, LocalDate endDate);
 }

@@ -9,7 +9,6 @@ public class Card {
     private String cvc;
     private int expiryMonth;
     private int expiryYear;
-    // Getters and Setters for all fields
 
 
     public Long getId() {

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: page-head(title='Moderate Reviews')}"></head>
+<body>
+<div th:replace="~{fragments/header :: page-header}"></div>
+
+<main class="section">
+    <div class="container" style="max-width: 900px; text-align: left;">
+        <h2>Review Moderation</h2>
+        <p>Reply to customer feedback and manage comment visibility.</p>
+
+        <div th:if="${success}" class="alert" style="background-color: #d4edda; color: #155724;" th:text="${success}"></div>
+
+        <div class="review-list" style="margin-top: 20px;">
+            <div th:if="${#lists.isEmpty(reviews)}">
+                <p>No reviews have been submitted yet.</p>
+            </div>
+
+            <div th:each="review : ${reviews}" class="review-card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <p class="star-rating" style="margin-bottom: 5px;">
+                            <span th:text="${review.score}">5</span>/5 ★
+                            <strong style="margin-left: 15px; color: #333;" th:text="${review.user.firstName + ' on ' + review.catalogueItem.name}">User on Item</strong>
+                        </p>
+                        <small style="color: #6c757d;" th:text="${'Reviewed on ' + #temporals.format(review.reviewDate, 'dd-MMM-yyyy')}">Date</small>
+                    </div>
+                    <div>
+                        <span th:text="${review.commentStatus}"
+                              th:classappend="${review.commentStatus == 'VISIBLE' ? 'status-approved' : 'status-pending'}"
+                              style="padding: 5px 8px; border-radius: 4px;">STATUS</span>
+                    </div>
+                </div>
+
+                <p th:if="${review.comment != null and !review.comment.isBlank()}" style="margin-top: 10px; background: #f8f9fa; padding: 10px; border-radius: 4px;" th:text="${review.comment}">Comment text.</p>
+
+                <div style="margin-top: 15px;">
+                    <form th:action="@{/admin/reviews/reply/{id}(id=${review.id})}" method="post" style="margin-bottom: 15px;">
+                        <label>Your Reply:</label>
+                        <textarea name="managerReply" rows="2" th:text="${review.managerReply}" placeholder="Write a public reply..."></textarea>
+                        <button type="submit" class="btn-login" style="margin-top: 5px;">Save Reply</button>
+                    </form>
+
+                    <form th:action="@{/admin/reviews/comment/status/{id}(id=${review.id})}" method="post">
+                        <label>Comment Visibility:</label>
+                        <select name="status">
+                            <option value="VISIBLE" th:selected="${review.commentStatus == 'VISIBLE'}">Visible</option>
+                            <option value="REMOVED" th:selected="${review.commentStatus == 'REMOVED'}">Removed</option>
+                        </select>
+                        <button type="submit" class="btn-login btn-secondary">Update Status</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .status-pending { color: #856404; background-color: #fff3cd; font-weight: bold; }
+    .status-approved { color: #155724; background-color: #d4edda; font-weight: bold; }
+    .btn-secondary { background-color: #6c757d; color: white; }
+</style>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+
+</body>
+</html>

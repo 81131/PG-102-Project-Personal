@@ -11,12 +11,10 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // This links the review to a specific item purchased in an order
     @OneToOne
     @JoinColumn(name = "order_item_id", nullable = false, unique = true)
     private OrderItem orderItem;
 
-    // This is a direct link to the catalogue item for easier querying
     @ManyToOne
     @JoinColumn(name = "catalogue_item_id", nullable = false)
     private CatalogueItem catalogueItem;
@@ -31,13 +29,11 @@ public class Review {
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String comment;
 
-    // New field for the manager's public reply
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String managerReply;
 
-    // New field to control comment visibility
     @Column(nullable = false)
-    private String commentStatus = "VISIBLE"; // Default to VISIBLE
+    private String commentStatus = "VISIBLE";
 
     @Column(nullable = false)
     private LocalDateTime reviewDate;

@@ -60,10 +60,10 @@
 
     // Add an event listener to the form to validate the date before submitting
     document.getElementById('bookingForm').addEventListener('submit', function(event) {
-        const selectedDate = dateInput.value; // Format: YYYY-MM-DD
+        const selectedDate = dateInput.value;
         if (unavailableDates.includes(selectedDate)) {
             alert('The selected date is not available. Please choose a different date.');
-            event.preventDefault(); // Stop the form from submitting
+            event.preventDefault();
         }
     });
 </script>

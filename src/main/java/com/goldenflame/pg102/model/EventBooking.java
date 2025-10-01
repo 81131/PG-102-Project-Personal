@@ -27,7 +27,7 @@ public class EventBooking {
     private LocalDateTime eventDateTime;
 
     @Column(nullable = false)
-    private String status; // e.g., PENDING_APPROVAL, PENDING_PAYMENT, CONFIRMED, REJECTED, CANCELLED
+    private String status;
 
     private int numberOfGuests;
 

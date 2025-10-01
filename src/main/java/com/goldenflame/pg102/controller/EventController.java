@@ -137,7 +137,6 @@ public class EventController {
         return "events/payment";
     }
 
-    // ADD THIS METHOD TO PROCESS THE PAYMENT
     @PostMapping("/payment/submit")
     public String processEventPayment(@RequestParam Long bookingId,
                                       @RequestParam String paymentMethod,

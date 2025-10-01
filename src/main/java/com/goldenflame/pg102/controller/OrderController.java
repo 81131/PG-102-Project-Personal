@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.bind.annotation.GetMapping; // Add GetMapping import
-import java.util.List; // Add List import
+import org.springframework.web.bind.annotation.GetMapping;
+import java.util.List;
 
 
 import java.util.Optional;
@@ -96,6 +96,6 @@ public class OrderController {
         User currentUser = userRepository.findByUsername(userDetails.getUsername()).get();
         List<Order> orders = orderService.findOrdersForUser(currentUser);
         model.addAttribute("orders", orders);
-        return "my-history"; // This will be our new template
+        return "my-history";
     }
 }

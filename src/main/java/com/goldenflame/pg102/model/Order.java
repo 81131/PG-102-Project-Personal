@@ -19,7 +19,6 @@ public class Order {
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
-    // The newly added field
     @ManyToOne
     @JoinColumn(name = "delivery_person_id", nullable = true)
     private User deliveryPerson;
@@ -34,7 +33,6 @@ public class Order {
 
     // --- Getters and Setters ---
 
-    // Getter and Setter for the new field
     public User getDeliveryPerson() {
         return deliveryPerson;
     }
@@ -43,7 +41,6 @@ public class Order {
         this.deliveryPerson = deliveryPerson;
     }
 
-    // --- Existing Getters and Setters ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public User getUser() { return user; }
