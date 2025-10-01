@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: page-head(title='Financial Reports')}"></head>
+<body>
+<div th:replace="~{fragments/header :: page-header}"></div>
+
+<main class="section">
+    <div class="container" style="text-align: left;">
+        <h2>Financial Reports</h2>
+
+        <div class="form-container" style="margin-bottom: 40px;">
+            <h3>Income Report</h3>
+            <p>View income from completed orders and other sources.</p>
+
+            <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+                <a th:href="@{/manager/reports(period='daily')}" class="btn-login" th:classappend="${selectedPeriod == 'daily' ? '' : 'btn-secondary'}">Today</a>
+                <a th:href="@{/manager/reports(period='weekly')}" class="btn-login" th:classappend="${selectedPeriod == 'weekly' ? '' : 'btn-secondary'}">This Week</a>
+                <a th:href="@{/manager/reports(period='monthly')}" class="btn-login" th:classappend="${selectedPeriod == 'monthly' ? '' : 'btn-secondary'}">This Month</a>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                <h4>Total Income for Period: <span style="color: #28a745;" th:text="'$' + ${#numbers.formatDecimal(totalIncome, 1, 2)}">$0.00</span></h4>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="user-table">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Payment ID</th>
+                        <th>Income Type</th>
+                        <th>Amount</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(incomeList)}">
+                        <td colspan="4" style="text-align: center;">No income recorded for this period.</td>
+                    </tr>
+                    <tr th:each="income : ${incomeList}">
+                        <td th:text="${#temporals.format(income.incomeDate, 'dd-MMM-yyyy')}">Date</td>
+                        <td th:text="${income.payment.id}">Payment ID</td>
+                        <td th:text="${income.incomeType}">FOOD_ORDER</td>
+                        <td th:text="'$' + ${#numbers.formatDecimal(income.amount, 1, 2)}">$0.00</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-container" style="opacity: 0.5;">
+            <h3>Income vs. Expense Report</h3>
+            <p>This feature is coming soon.</p>
+        </div>
+
+    </div>
+</main>
+<style>
+    .btn-secondary { background-color: #6c757d; color: white; }
+    .btn-secondary:hover { background-color: #5a6268; }
+</style>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+</body>
+</html>

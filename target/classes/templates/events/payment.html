@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: page-head(title='Event Payment')}"></head>
+<body>
+<div th:replace="~{fragments/header :: page-header}"></div>
+
+<main class="section">
+    <div class="container" style="max-width: 800px; text-align: left;">
+        <h2>Confirm Event Payment</h2>
+
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <div class="form-box" style="margin-bottom: 30px;">
+            <h4>Booking Summary</h4>
+            <p><strong>Booking #:</strong> <span th:text="${booking.id}"></span></p>
+            <p><strong>Package:</strong> <span th:text="${booking.eventPackage.name}"></span></p>
+            <p><strong>Date:</strong> <span th:text="${#temporals.format(booking.eventDateTime, 'dd-MMM-yyyy HH:mm')}"></span></p>
+            <p><strong>Guests:</strong> <span th:text="${booking.numberOfGuests}"></span></p>
+            <hr/>
+            <h4 style="margin-top: 15px;">Total Amount Due: $<span th:text="${#numbers.formatDecimal(totalPrice, 1, 2)}">0.00</span></h4>
+        </div>
+
+        <form th:action="@{/events/payment/submit}" method="post" class="form-box">
+            <input type="hidden" name="bookingId" th:value="${booking.id}" />
+
+            <h4 style="margin-top: 30px;">Select Payment Method</h4>
+            <select name="paymentMethod" required onchange="toggleCardDetails(this.value)">
+                <option value="CARD">Credit/Debit Card</option>
+            </select>
+
+            <div id="card-details" style="margin-top: 20px;" class="form-grid">
+                <div><label>Card Number</label><input type="text" name="cardNumber" placeholder="5040705240328972" required></div>
+                <div><label>CVC</label><input type="text" name="cvc" placeholder="123" required></div>
+                <div><label>Expiry Month</label><input type="number" name="expiryMonth" placeholder="12" required></div>
+                <div><label>Expiry Year</label><input type="number" name="expiryYear" placeholder="2028" required></div>
+            </div>
+
+            <button type="submit" class="btn-login" style="width: 100%; margin-top: 30px;">Confirm and Pay</button>
+        </form>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+
+<script>
+    function toggleCardDetails(paymentMethod) {
+        const cardDetails = document.getElementById('card-details');
+        if (paymentMethod === 'CARD') {
+            cardDetails.style.display = 'grid';
+            cardDetails.querySelectorAll('input').forEach(input => input.required = true);
+        } else {
+            cardDetails.style.display = 'none';
+            cardDetails.querySelectorAll('input').forEach(input => input.required = false);
+        }
+    }
+    // Initialize on page load
+    toggleCardDetails('CARD');
+</script>
+</body>
+</html>

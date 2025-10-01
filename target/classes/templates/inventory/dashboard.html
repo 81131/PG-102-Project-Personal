@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: page-head(title='Inventory Management')}"></head>
+<body>
+<div th:replace="~{fragments/header :: page-header}"></div>
+
+<main class="section">
+    <div class="container" style="text-align: left;">
+        <h2>Inventory Dashboard</h2>
+
+        <div th:if="${success}" class="alert" style="background-color: #d4edda; color: #155724;" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <div style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
+            <button class="btn-login" onclick="openModal('addItemModal')">Add New Item</button>
+            <button class="btn-login" style="background-color: #28a745;" onclick="openModal('addPurchaseModal')">Record Purchase (Stock In)</button>
+            <button class="btn-login" style="background-color: #ffc107; color: #212529;" onclick="openModal('recordUsageModal')">Record Usage (Stock Out)</button>
+            <button class="btn-login" style="background-color: #6c757d;" onclick="openModal('addSupplierModal')">Manage Suppliers</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px;">
+            <div class="alert alert-danger">
+                <strong>Low Stock Items:</strong>
+                <span th:text="${#lists.size(items.?[currentQuantity < lowStockThreshold])}">0</span> items are below threshold.
+            </div>
+            <div class="alert" style="background-color: #fff3cd; color: #856404;">
+                <strong>Expiring Soon (Next 7 Days):</strong>
+                <span th:text="${#lists.size(expiringSoon)}">0</span> batches.
+            </div>
+        </div>
+
+        <div class="form-container" style="margin-bottom: 40px;" th:if="${!#lists.isEmpty(expiringSoon)}">
+            <h3>Items Expiring Soon</h3>
+            <div style="overflow-x:auto;">
+                <table class="user-table">
+                    <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Supplier</th>
+                        <th>Quantity in Batch</th>
+                        <th>Expiry Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="purchase : ${expiringSoon}" class="low-stock-row">
+                        <td th:text="${purchase.inventoryItem.name}">-</td>
+                        <td th:text="${purchase.supplier?.name}">-</td>
+                        <td th:text="${#numbers.formatDecimal(purchase.quantityPurchased, 1, 2) + ' ' + purchase.inventoryItem.measurementUnit}">-</td>
+                        <td th:text="${#temporals.format(purchase.expiryDate, 'dd-MMM-yyyy')}">-</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <h3>Current Stock Levels</h3>
+            <div style="overflow-x:auto;">
+                <table class="user-table">
+                    <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Category</th>
+                        <th>Current Quantity</th>
+                        <th>Low Stock Threshold</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(items)}">
+                        <td colspan="5" style="text-align: center;">No inventory items found. Add one to get started.</td>
+                    </tr>
+                    <tr th:each="item : ${items}" th:classappend="${item.currentQuantity < item.lowStockThreshold ? 'low-stock-row' : ''}">
+                        <td th:text="${item.name}">-</td>
+                        <td th:text="${item.category?.name}">-</td>
+                        <td><strong th:text="${#numbers.formatDecimal(item.currentQuantity, 1, 2) + ' ' + item.measurementUnit}">-</strong></td>
+                        <td th:text="${#numbers.formatDecimal(item.lowStockThreshold, 1, 2) + ' ' + item.measurementUnit}">-</td>
+                        <td>
+                            <span th:if="${item.currentQuantity < item.lowStockThreshold}" class="status-pending">LOW</span>
+                            <span th:unless="${item.currentQuantity < item.lowStockThreshold}" class="status-approved">OK</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="addItemModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('addItemModal')">&times;</span>
+        <h3>Add New Inventory Item</h3>
+        <form th:action="@{/inventory/item/add}" method="post" class="form-container">
+            <input type="text" name="name" placeholder="Item Name (e.g., All-Purpose Flour)" required>
+            <select name="categoryId" onchange="toggleNewInvCategory(this.value)" required>
+                <option value="">-- Select Category --</option>
+                <option th:each="cat : ${inventoryCategories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                <option value="-1">-- Create New Category --</option>
+            </select>
+            <input type="text" id="newCategoryName" name="newCategoryName" placeholder="New Category Name" style="display:none; margin-top: 10px;">
+            <input type="text" name="measurementUnit" placeholder="Measurement Unit (e.g., kg, liters, units)" required>
+            <input type="number" step="0.1" name="lowStockThreshold" placeholder="Low Stock Threshold (e.g., 5)" required>
+            <button type="submit" class="btn-login">Save Item</button>
+        </form>
+    </div>
+</div>
+
+<div id="addPurchaseModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('addPurchaseModal')">&times;</span>
+        <h3>Record New Purchase (Stock In)</h3>
+        <form th:action="@{/inventory/purchase/add}" method="post" class="form-container">
+            <label>Item</label>
+            <select name="itemId" required><option value="">-- Select Item --</option><option th:each="item : ${items}" th:value="${item.id}" th:text="${item.name}"></option></select>
+            <label>Supplier</label>
+            <select name="supplierId" required><option value="">-- Select Supplier --</option><option th:each="supplier : ${suppliers}" th:value="${supplier.id}" th:text="${supplier.name}"></option></select>
+            <label>Quantity Purchased</label>
+            <input type="number" step="0.1" name="quantity" placeholder="e.g., 25" required>
+            <label>Unit Price ($)</label>
+            <input type="number" step="0.01" name="unitPrice" placeholder="e.g., 2.50" required>
+            <label>Purchase Date</label>
+            <input type="date" name="purchaseDate" required>
+            <label>Expiry Date (Optional)</label>
+            <input type="date" name="expiryDate">
+            <button type="submit" class="btn-login">Record Purchase</button>
+        </form>
+    </div>
+</div>
+
+<div id="recordUsageModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('recordUsageModal')">&times;</span>
+        <h3>Record Stock Usage (Stock Out)</h3>
+        <form th:action="@{/inventory/usage/add}" method="post" class="form-container">
+            <label>Item Used</label>
+            <select name="itemId" required><option value="">-- Select Item --</option><option th:each="item : ${items}" th:value="${item.id}" th:text="${item.name}"></option></select>
+            <label>Quantity Used</label>
+            <input type="number" step="0.1" name="quantity" placeholder="e.g., 0.5" required>
+            <label>Reason</label>
+            <input type="text" name="reason" placeholder="e.g., Used for daily special" required>
+            <button type="submit" class="btn-login">Record Usage</button>
+        </form>
+    </div>
+</div>
+
+<div id="addSupplierModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('addSupplierModal')">&times;</span>
+        <h3>Manage Suppliers</h3>
+        <form th:action="@{/inventory/supplier/add}" method="post" style="margin-bottom: 20px;" class="form-container">
+            <h4>Add New Supplier</h4>
+            <input type="text" name="name" placeholder="Supplier Name" required>
+            <input type="text" name="contactInfo" placeholder="Contact Info (Phone/Email)" required>
+            <button type="submit" class="btn-login">Add Supplier</button>
+        </form>
+        <hr/>
+        <h4>Existing Suppliers</h4>
+        <ul th:if="${!suppliers.isEmpty()}">
+            <li th:each="supplier : ${suppliers}" th:text="${supplier.name + ' - ' + supplier.contact_info}"></li>
+        </ul>
+        <p th:if="${suppliers.isEmpty()}">No suppliers added yet.</p>
+    </div>
+</div>
+
+<script>
+    function openModal(modalId) { document.getElementById(modalId).style.display = "block"; }
+    function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = "none";
+        }
+    }
+    function toggleNewInvCategory(value) {
+        const newCategoryInput = document.getElementById('newCategoryName');
+        if (value === '-1') {
+            newCategoryInput.style.display = 'block';
+            newCategoryInput.required = true;
+        } else {
+            newCategoryInput.style.display = 'none';
+            newCategoryInput.required = false;
+        }
+    }
+</script>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+</body>
+</html>

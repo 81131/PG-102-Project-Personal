@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: page-head(title='My Event Bookings')}"></head>
+<body>
+<div th:replace="~{fragments/header :: page-header}"></div>
+
+<main class="section">
+    <div class="container">
+        <h2>My Event Bookings</h2>
+
+        <div th:if="${#lists.isEmpty(bookings)}" class="form-container" style="text-align: center;">
+            <p>You have not requested any event bookings yet.</p>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(bookings)}" class="order-history-list">
+            <div th:each="booking : ${bookings}" class="order-card">
+                <div class="order-card-header">
+                    <div>
+                        <strong>Booking #<span th:text="${booking.id}">123</span></strong>
+                        <p>Date: <span th:text="${#temporals.format(booking.eventDateTime, 'dd-MMM-yyyy HH:mm')}">Date</span></p>
+                    </div>
+                    <div>
+                        <strong>Package: <span th:text="${booking.eventPackage.name}">Package Name</span></strong>
+                        <p>Status:
+                            <span th:text="${booking.status}"
+                                  th:classappend="${booking.status == 'PENDING_APPROVAL' ? 'status-pending' : (booking.status.contains('APPROVED') ? 'status-approved' : 'status-other')}">
+                               STATUS
+                           </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="order-card-body">
+                    <p><strong>Guests:</strong> <span th:text="${booking.numberOfGuests}">0</span></p>
+                    <div th:if="${booking.specialRequests}" style="margin-top: 10px;">
+                        <strong>Special Requests:</strong>
+                        <p style="white-space: pre-wrap; background: #f8f9fa; padding: 10px; border-radius: 4px;" th:text="${booking.specialRequests}"></p>
+                    </div>
+
+                    <div th:if="${booking.status == 'APPROVED_PENDING_PAYMENT'}" style="margin-top: 20px;">
+                        <a th:href="@{/events/payment/{id}(id=${booking.id})}" class="btn-login" style="background-color: #28a745;">Proceed to Payment</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .status-pending { color: #856404; font-weight: bold; }
+    .status-approved { color: #155724; font-weight: bold; }
+    .status-other { color: #6c757d; }
+</style>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+</body>
+</html>

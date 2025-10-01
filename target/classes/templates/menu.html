@@ -10,9 +10,9 @@
         <h2 style="color: #f4f4f4">Our Menu</h2>
         <div class="category-grid">
             <a th:each="category : ${categories}"
-               th:href="@{/menu/{cat}(cat=${category.toString().toLowerCase()})}"
+               th:href="@{/menu/{cat}(cat=${category.name.toLowerCase().replace(' ', '-')})}"
                class="category-link">
-                <h3 th:text="${#strings.capitalizeWords(category.toString().toLowerCase().replace('_', ' '))}"></h3>
+                <h3 th:text="${category.name}">Category Name</h3>
             </a>
         </div>
     </div>

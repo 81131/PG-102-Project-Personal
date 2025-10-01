@@ -1,7 +1,7 @@
 package com.goldenflame.pg102.service;
 
 import com.goldenflame.pg102.model.CatalogueItem;
-import com.goldenflame.pg102.model.CatalogueItemType;
+import com.goldenflame.pg102.model.Category; // Import Category
 import com.goldenflame.pg102.repository.CatalogueItemRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -9,7 +9,6 @@ import java.util.Optional;
 
 @Service
 public class CatalogueService {
-
 
     private final CatalogueItemRepository catalogueItemRepository;
 
@@ -21,8 +20,9 @@ public class CatalogueService {
         return catalogueItemRepository.findAll();
     }
 
-    public List<CatalogueItem> getItemsByType(CatalogueItemType itemType) {
-        return catalogueItemRepository.findByItemType(itemType);
+    // Update this method to accept a Category object
+    public List<CatalogueItem> getItemsByCategory(Category category) {
+        return catalogueItemRepository.findByCategory(category);
     }
 
     public Optional<CatalogueItem> findById(Long id) {

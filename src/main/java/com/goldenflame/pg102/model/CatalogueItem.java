@@ -2,12 +2,9 @@ package com.goldenflame.pg102.model;
 
 import jakarta.persistence.*;
 import java.util.List;
-import java.util.OptionalDouble;
 
 @Entity
 @Table(name = "catalogue_items")
-
-
 public class CatalogueItem {
 
     @Id
@@ -16,8 +13,9 @@ public class CatalogueItem {
 
     private String name;
     private String description;
+    private Float basePrice;
 
-    // This tells JPA to store the list of photo URLs in a separate table
+
     @ElementCollection
     @CollectionTable(name = "catalogue_item_photos", joinColumns = @JoinColumn(name = "item_id"))
     @Column(name = "photo_url")
@@ -25,30 +23,19 @@ public class CatalogueItem {
 
     private int servingSizePerson;
 
-    @Enumerated(EnumType.STRING) // Stores the enum name (e.g., "APPETIZER") in the DB
-    private CatalogueItemType itemType;
-
     private float price;
 
-    // One item can have many reviews. 'cascade = CascadeType.ALL' means if we delete an item, its reviews are also deleted.
     @OneToMany(mappedBy = "catalogueItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 
+    // --- This is the new field that replaces itemType ---
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     // --- Methods and Getters/Setters ---
 
-    // Default constructor for JPA
     public CatalogueItem() {}
-
-    // You can keep your other constructor for creating new items
-    public CatalogueItem(String name, String description, List<String> photoUrls, int servingSizePerson, CatalogueItemType itemType, float price, List<Review> reviews) {
-        this.name = name;
-        this.description = description;
-        this.photoUrls = photoUrls;
-        this.servingSizePerson = servingSizePerson;
-        this.itemType = itemType;
-        this.price = price;
-        this.reviews = reviews;
-    }
 
     public double getAverageRating() {
         if (reviews == null || reviews.isEmpty()) {
@@ -57,7 +44,7 @@ public class CatalogueItem {
         return reviews.stream().mapToInt(Review::getScore).average().orElse(0.0);
     }
 
-    // Getters and Setters for all fields...
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
@@ -68,10 +55,19 @@ public class CatalogueItem {
     public void setPhotoUrls(List<String> photoUrls) { this.photoUrls = photoUrls; }
     public int getServingSizePerson() { return servingSizePerson; }
     public void setServingSizePerson(int servingSizePerson) { this.servingSizePerson = servingSizePerson; }
-    public CatalogueItemType getItemType() { return itemType; }
-    public void setItemType(CatalogueItemType itemType) { this.itemType = itemType; }
     public float getPrice() { return price; }
     public void setPrice(float price) { this.price = price; }
+    public Float getBasePrice() {
+        return basePrice;
+    }
+
+    public void setBasePrice(Float basePrice) {
+        this.basePrice = basePrice;
+    }
     public List<Review> getReviews() { return reviews; }
     public void setReviews(List<Review> reviews) { this.reviews = reviews; }
+
+    // Getter and Setter for the new Category field
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
 }

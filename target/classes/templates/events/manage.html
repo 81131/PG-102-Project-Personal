@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: page-head(title='Manage Events')}"></head>
+<body>
+<div th:replace="~{fragments/header :: page-header}"></div>
+
+<main class="section">
+    <div class="container" style="text-align: left;">
+        <h2>Event Bookings Dashboard</h2>
+
+        <div th:if="${success}" class="alert" style="background-color: #d4edda; color: #155724;" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <div class="form-container" style="margin-bottom: 40px;">
+            <h3>All Booking Requests</h3>
+            <p>Review pending requests, and view confirmed or past events.</p>
+
+            <div style="overflow-x:auto;">
+                <table class="user-table">
+                    <thead>
+                    <tr>
+                        <th>Event Date & Time</th>
+                        <th>Customer</th>
+                        <th>Event Package</th>
+                        <th>Guests</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(bookings)}">
+                        <td colspan="6" style="text-align: center;">No event bookings found.</td>
+                    </tr>
+                    <tr th:each="booking : ${bookings}">
+                        <td th:text="${#temporals.format(booking.eventDateTime, 'dd-MMM-yyyy HH:mm')}">Date & Time</td>
+                        <td th:text="${booking.user.firstName + ' ' + booking.user.lastName}">Customer Name</td>
+                        <td th:text="${booking.eventPackage.name}">Package Name</td>
+                        <td th:text="${booking.numberOfGuests}">Guests</td>
+                        <td>
+                            <span th:text="${booking.status}"
+                                  th:classappend="${booking.status == 'PENDING_APPROVAL' ? 'status-pending' : (booking.status == 'APPROVED_PENDING_PAYMENT' ? 'status-approved' : 'status-other')}">
+                                STATUS
+                            </span>
+                        </td>
+                        <td>
+                            <div th:if="${booking.status == 'PENDING_APPROVAL'}" style="display: flex; gap: 5px;">
+                                <form th:action="@{/events/manage/approve/{id}(id=${booking.id})}" method="post">
+                                    <button type="submit" class="btn-login" style="background-color: #28a745;">Approve</button>
+                                </form>
+                                <form th:action="@{/events/manage/reject/{id}(id=${booking.id})}" method="post">
+                                    <button type="submit" class="btn-delete">Reject</button>
+                                </form>
+                            </div>
+
+                            <div th:if="${booking.status == 'APPROVED_PENDING_PAYMENT'}">
+                                <form th:action="@{/events/manage/cancel/{id}(id=${booking.id})}" method="post">
+                                    <button type="submit" class="btn-delete">Cancel Booking</button>
+                                </form>
+                            </div>
+
+                            <div th:if="${booking.status != 'PENDING_APPROVAL' and booking.status != 'APPROVED_PENDING_PAYMENT'}">
+                                <span>No actions available</span>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .status-pending { color: #856404; background-color: #fff3cd; padding: 5px 8px; border-radius: 4px; font-weight: bold; }
+    .status-approved { color: #155724; background-color: #d4edda; padding: 5px 8px; border-radius: 4px; font-weight: bold; }
+    .status-other { color: #6c757d; }
+</style>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+</body>
+</html>

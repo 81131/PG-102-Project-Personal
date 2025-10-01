@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: page-head(title='Manage Catalogue')}"></head>
+<body>
+<div th:replace="~{fragments/header :: page-header}"></div>
+
+<main class="section">
+    <div class="container">
+        <h2>Manage Catalogue</h2>
+
+        <div th:if="${success}" class="alert" style="background-color: #d4edda; color: #155724; border-color: #c3e6cb;" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 40px; text-align: left; margin-bottom: 40px;">
+            <div class="form-container">
+                <h3>Add New Menu Item</h3>
+                <form th:action="@{/kitchen/catalogue/add}" method="post" enctype="multipart/form-data">
+                    <input type="text" name="name" placeholder="Item Name" required>
+                    <textarea name="description" placeholder="Item Description" required rows="3" style="width: 100%; padding: 8px; box-sizing: border-box; margin-bottom: 10px;"></textarea>
+                    <input type="number" name="price" placeholder="Price ($) / Price Per Person" step="0.01" required>
+
+                    <input type="number" id="basePrice" name="basePrice" placeholder="Base Price (for >50 guests)" step="0.01" style="display:none; margin-top: 10px;">
+
+                    <input type="number" name="servingSizePerson" placeholder="Serving Size (Persons)" value="1" min="1" required>
+
+                    <label style="margin-top: 10px; display: block;">Category</label>
+                    <select name="categoryId" onchange="toggleNewCategory(this.value); checkEventCategory(this);" required>
+                        <option value="">-- Select Existing Category --</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                        <option value="-1">-- Create New Category --</option>
+                    </select>
+
+                    <input type="text" id="newCategoryName" name="newCategoryName" placeholder="New Category Name" style="display:none; margin-top: 10px;">
+
+                    <label style="margin-top: 10px; display: block;">Item Image</label>
+                    <div class="drop-zone">
+                        <span class="drop-zone__prompt">Drag & drop an image here or click to select</span>
+                        <input type="file" name="image" class="drop-zone__input" accept="image/*">
+                    </div>
+
+                    <button type="submit" class="btn-login" style="margin-top: 15px;">Add Item</button>
+                </form>
+            </div>
+
+            <div class="form-container">
+                <h3>Add New Category</h3>
+                <form th:action="@{/kitchen/catalogue/category/add}" method="post">
+                    <input type="text" name="name" placeholder="New Category Name" required>
+                    <button type="submit" class="btn-login" style="margin-top: 15px;">Add Category</button>
+                </form>
+            </div>
+        </div>
+
+        <h3>Existing Menu Items</h3>
+        <div style="overflow-x:auto;">
+            <table class="user-table">
+                <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price / Per Person</th>
+                    <th>Serves</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <th:block th:each="item : ${items}">
+                    <tr>
+                        <td><img th:src="${#lists.isEmpty(item.photoUrls) ? '/images/default.jpg' : item.photoUrls.get(0)}" alt="Item Image" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;"></td>
+                        <td th:text="${item.name}">Item Name</td>
+                        <td th:text="${item.category.name}">Category</td>
+                        <td th:text="'$' + ${#numbers.formatDecimal(item.price, 1, 2)}">$0.00</td>
+                        <td th:text="${item.servingSizePerson}">1</td>
+                        <td>
+                            <button class="btn-login" style="background-color: #6c757d;" th:attr="onclick=|toggleEditForm('edit-form-${item.id}')|">Edit</button>
+                        </td>
+                    </tr>
+                    <tr class="edit-form-row" th:id="'edit-form-' + ${item.id}" style="display: none;">
+                        <td colspan="6">
+                            <div class="form-container" style="margin: 10px; text-align: left;">
+                                <h4>Edit '<span th:text="${item.name}"></span>'</h4>
+                                <form th:action="@{/kitchen/catalogue/edit/{id}(id=${item.id})}" method="post" enctype="multipart/form-data">
+                                    <label>Name</label>
+                                    <input type="text" name="name" th:value="${item.name}" required>
+
+                                    <label>Description</label>
+                                    <textarea name="description" required rows="3" style="width: 100%; padding: 8px; box-sizing: border-box; margin-bottom: 10px;" th:text="${item.description}"></textarea>
+
+                                    <label>Price ($) / Price Per Person</label>
+                                    <input type="number" name="price" step="0.01" th:value="${item.price}" required>
+
+                                    <div th:with="isEvent=${item.category.name == 'Milestone Parties' or item.category.name == 'Family & Life Events'}">
+                                        <label th:if="${isEvent}">Base Price (for >50 guests)</label>
+                                        <input th:if="${isEvent}" type="number" name="basePrice" placeholder="Base Price" step="0.01" th:value="${item.basePrice}">
+                                    </div>
+
+                                    <label>Serving Size (Persons)</label>
+                                    <input type="number" name="servingSizePerson" min="1" th:value="${item.servingSizePerson}" required>
+
+                                    <label>Category</label>
+                                    <select name="categoryId" required>
+                                        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}" th:selected="${cat.id == item.category.id}"></option>
+                                    </select>
+
+                                    <label style="margin-top: 10px; display: block;">Replace Image (Optional)</label>
+                                    <div class="drop-zone">
+                                        <span class="drop-zone__prompt">Drag & drop an image here or click to select</span>
+                                        <input type="file" name="image" class="drop-zone__input" accept="image/*">
+                                    </div>
+
+                                    <button type="submit" class="btn-login" style="margin-top: 15px;">Save Changes</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </th:block>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+
+<script>
+    function toggleNewCategory(value) {
+        const newCategoryInput = document.getElementById('newCategoryName');
+        if (value === '-1') {
+            newCategoryInput.style.display = 'block';
+            newCategoryInput.required = true;
+        } else {
+            newCategoryInput.style.display = 'none';
+            newCategoryInput.required = false;
+        }
+    }
+
+    function toggleEditForm(formId) {
+        const formRow = document.getElementById(formId);
+        if (formRow.style.display === 'none') {
+            document.querySelectorAll('.edit-form-row').forEach(row => row.style.display = 'none');
+            formRow.style.display = 'table-row';
+        } else {
+            formRow.style.display = 'none';
+        }
+    }
+
+    // New function to show/hide the basePrice input
+    function checkEventCategory(selectElement) {
+        const basePriceInput = document.getElementById('basePrice');
+        const selectedOptionText = selectElement.options[selectElement.selectedIndex].text;
+
+        if (selectedOptionText.includes("Parties") || selectedOptionText.includes("Events")) {
+            basePriceInput.style.display = 'block';
+        } else {
+            basePriceInput.style.display = 'none';
+        }
+    }
+
+    document.querySelectorAll(".drop-zone__input").forEach((inputElement) => {
+        const dropZoneElement = inputElement.closest(".drop-zone");
+
+        dropZoneElement.addEventListener("click", (e) => {
+            inputElement.click();
+        });
+
+        inputElement.addEventListener("change", (e) => {
+            if (inputElement.files.length) {
+                updateThumbnail(dropZoneElement, inputElement.files[0]);
+            }
+        });
+
+        dropZoneElement.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dropZoneElement.classList.add("drop-zone--over");
+        });
+
+        ["dragleave", "dragend"].forEach((type) => {
+            dropZoneElement.addEventListener(type, (e) => {
+                dropZoneElement.classList.remove("drop-zone--over");
+            });
+        });
+
+        dropZoneElement.addEventListener("drop", (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) {
+                inputElement.files = e.dataTransfer.files;
+                updateThumbnail(dropZoneElement, e.dataTransfer.files[0]);
+            }
+            dropZoneElement.classList.remove("drop-zone--over");
+        });
+    });
+
+    function updateThumbnail(dropZoneElement, file) {
+        let thumbnailElement = dropZoneElement.querySelector(".drop-zone__thumb");
+
+        if (dropZoneElement.querySelector(".drop-zone__prompt")) {
+            dropZoneElement.querySelector(".drop-zone__prompt").style.display = 'none';
+        }
+
+        if (!thumbnailElement) {
+            thumbnailElement = document.createElement("div");
+            thumbnailElement.classList.add("drop-zone__thumb");
+            dropZoneElement.appendChild(thumbnailElement);
+        }
+
+        thumbnailElement.dataset.label = file.name;
+
+        if (file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                thumbnailElement.style.backgroundImage = `url('${reader.result}')`;
+            };
+        } else {
+            thumbnailElement.style.backgroundImage = null;
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -4,7 +4,10 @@
 
 <header th:fragment="page-header">
     <div class="container">
-        <h1><a href="/" style="color: #fff; text-decoration: none;">Golden Flame Restaurant</a></h1>
+        <a th:href="@{/}" style="display: flex; align-items: center; text-decoration: none; color: white;">
+            <img th:src="@{/images/GoldenFlame_Logo.png}" alt="Golden Flame Logo"
+                 style="height: 50px; border-radius: 50%; margin-right: 15px;">
+        </a>
         <nav>
             <ul>
                 <li><a href="/menu">Menu</a></li>
@@ -15,10 +18,27 @@
                 <li sec:authorize="hasAnyRole('ROLE_KITCHEN_SUPERVISOR', 'ROLE_KITCHEN_STAFF')">
                     <a th:href="@{/kitchen/orders}">Manage Orders</a>
                 </li>
+                <li sec:authorize="hasRole('ROLE_MANAGER')">
+                    <a th:href="@{/admin/inventory-logs}">Inventory Logs</a>
+                </li>
+                <li sec:authorize="hasAnyRole('ROLE_MANAGER', 'ROLE_KITCHEN_SUPERVISOR')">
+                    <a th:href="@{/inventory}">Inventory</a>
+                </li>
+                <li sec:authorize="hasRole('ROLE_MANAGER')">
+                    <a th:href="@{/manager/reports}">Financial Reports</a>
+                </li>
+                <li sec:authorize="hasRole('ROLE_EVENT_COORDINATOR')">
+                    <a th:href="@{/events/manage}">Manage Events</a>
+                </li>
+                <li sec:authorize="hasAnyRole('ROLE_KITCHEN_SUPERVISOR', 'ROLE_EVENT_COORDINATOR')">
+                    <a th:href="@{/kitchen/catalogue}">Edit Catalogue</a>
+                </li>
                 <li sec:authorize="hasRole('ROLE_DELIVERY_PERSON')">
                     <a th:href="@{/delivery/my-tasks}">My Deliveries</a>
                 </li>
+
             </ul>
+
 
             <script sec:authorize="isAuthenticated()">
                 document.addEventListener("DOMContentLoaded", function() {
@@ -43,6 +63,7 @@
             <div sec:authorize="isAuthenticated()" style="display: flex; align-items: center;">
 
 
+                <a th:href="@{/events/my-bookings}" style="color: white; margin-right: 15px; text-decoration: none;" sec:authorize="hasRole('ROLE_CUSTOMER')">My Bookings</a>
                 <span style="margin-right: 15px;">Welcome, <strong sec:authentication="name">User</strong></span>
                 <a th:href="@{/cart}" class="cart-container">
                     <img th:src="@{/images/cart_icon.png}" alt="Shopping Cart" class="cart-icon">

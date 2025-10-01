@@ -4,15 +4,19 @@ import com.goldenflame.pg102.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import com.goldenflame.pg102.repository.InventoryUsageLogRepository;
+
 
 @Controller
-@RequestMapping("/admin") // All methods in this class will be under the /admin path
+@RequestMapping("/admin")
 public class AdminController {
 
     private final UserService userService;
+    private final InventoryUsageLogRepository inventoryUsageLogRepository; // Inject this
 
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, InventoryUsageLogRepository inventoryUsageLogRepository) { // Update constructor
         this.userService = userService;
+        this.inventoryUsageLogRepository = inventoryUsageLogRepository; // Add this
     }
 
     @GetMapping("/users")
@@ -43,5 +47,12 @@ public class AdminController {
     public String deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return "redirect:/admin/users";
+    }
+
+    // ADD THIS NEW METHOD
+    @GetMapping("/inventory-logs")
+    public String showInventoryLogs(Model model) {
+        model.addAttribute("logs", inventoryUsageLogRepository.findAllByOrderByUsageDateDesc());
+        return "admin/inventory-logs";
     }
 }

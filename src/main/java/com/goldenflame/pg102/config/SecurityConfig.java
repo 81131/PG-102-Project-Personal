@@ -47,11 +47,16 @@ public class SecurityConfig {
                         ).permitAll()
                         // Require authentication for all OTHER pages
                         .requestMatchers("/admin/**").hasRole("MANAGER")
-                        .requestMatchers("/kitchen/**").hasAnyRole("KITCHEN_SUPERVISOR", "KITCHEN_STAFF")
+                        .requestMatchers("/manager/**").hasRole("MANAGER")
+                        .requestMatchers("/kitchen/catalogue/**").hasAnyRole("KITCHEN_SUPERVISOR", "EVENT_COORDINATOR")
                         .requestMatchers("/kitchen/**").hasAnyRole("KITCHEN_SUPERVISOR", "KITCHEN_STAFF")
                         .requestMatchers("/order/my-history").authenticated()
                         .requestMatchers("/api/notifications/**", "/notifications").authenticated()
                         .requestMatchers("/delivery/**").hasRole("DELIVERY_PERSON")
+                        .requestMatchers("/kitchen/catalogue/**").hasAnyRole("KITCHEN_SUPERVISOR", "EVENT_COORDINATOR")
+                        .requestMatchers("/events/manage/**").hasRole("EVENT_COORDINATOR")
+                        .requestMatchers("/events/book/**").authenticated()
+                        .requestMatchers("/events/manage/**").hasRole("EVENT_COORDINATOR")
                         .requestMatchers("/orders/**").authenticated()
                         .anyRequest().authenticated()
 
