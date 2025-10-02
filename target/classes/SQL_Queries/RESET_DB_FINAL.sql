@@ -9,12 +9,13 @@ IF OBJECT_ID('suppliers', 'U') IS NOT NULL DROP TABLE suppliers;
 IF OBJECT_ID('notifications', 'U') IS NOT NULL DROP TABLE notifications;
 IF OBJECT_ID('cart_items', 'U') IS NOT NULL DROP TABLE cart_items;
 IF OBJECT_ID('shopping_carts', 'U') IS NOT NULL DROP TABLE shopping_carts;
+IF OBJECT_ID('reviews', 'U') IS NOT NULL DROP TABLE reviews; -- Dropping before order_items
 IF OBJECT_ID('order_items', 'U') IS NOT NULL DROP TABLE order_items;
 IF OBJECT_ID('event_bookings', 'U') IS NOT NULL DROP TABLE event_bookings;
 IF OBJECT_ID('income', 'U') IS NOT NULL DROP TABLE income;
+IF OBJECT_ID('manual_expenses', 'U') IS NOT NULL DROP TABLE manual_expenses;
 IF OBJECT_ID('orders', 'U') IS NOT NULL DROP TABLE orders;
 IF OBJECT_ID('payments', 'U') IS NOT NULL DROP TABLE payments;
-IF OBJECT_ID('reviews', 'U') IS NOT NULL DROP TABLE reviews;
 IF OBJECT_ID('catalogue_item_photos', 'U') IS NOT NULL DROP TABLE catalogue_item_photos;
 IF OBJECT_ID('catalogue_items', 'U') IS NOT NULL DROP TABLE catalogue_items;
 IF OBJECT_ID('categories', 'U') IS NOT NULL DROP TABLE categories;
@@ -37,7 +38,6 @@ GO
 CREATE TABLE categories (id BIGINT IDENTITY(1,1) PRIMARY KEY, name NVARCHAR(100) NOT NULL UNIQUE);
 CREATE TABLE catalogue_items (id BIGINT IDENTITY(1,1) PRIMARY KEY, name NVARCHAR(255) NOT NULL, description NVARCHAR(MAX), serving_size_person INT NOT NULL DEFAULT 1, price FLOAT NOT NULL, base_price FLOAT NULL, category_id BIGINT, FOREIGN KEY (category_id) REFERENCES categories(id));
 CREATE TABLE catalogue_item_photos (item_id BIGINT NOT NULL, photo_url NVARCHAR(255), FOREIGN KEY (item_id) REFERENCES catalogue_items(id) ON DELETE CASCADE);
-CREATE TABLE reviews (id BIGINT IDENTITY(1,1) PRIMARY KEY, catalogue_item_id BIGINT NOT NULL, user_id BIGINT NOT NULL, score INT NOT NULL, comment NVARCHAR(MAX), FOREIGN KEY (catalogue_item_id) REFERENCES catalogue_items(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE);
 GO
 
 -- Order, Payment, and Cart Tables
@@ -52,12 +52,27 @@ GO
 CREATE TABLE event_bookings (id BIGINT IDENTITY(1,1) PRIMARY KEY, user_id BIGINT NOT NULL, catalogue_item_id BIGINT NOT NULL, payment_id BIGINT, event_date_time DATETIME NOT NULL, status VARCHAR(255) NOT NULL, number_of_guests INT NOT NULL, special_requests NVARCHAR(MAX), FOREIGN KEY (user_id) REFERENCES users(id), FOREIGN KEY (catalogue_item_id) REFERENCES catalogue_items(id), FOREIGN KEY (payment_id) REFERENCES payments(id));
 GO
 
--- Other Core Tables
-CREATE TABLE income (id BIGINT IDENTITY(1,1) PRIMARY KEY, payment_id BIGINT NOT NULL, amount FLOAT NOT NULL, income_type VARCHAR(50) NOT NULL, income_date DATE NOT NULL, FOREIGN KEY (payment_id) REFERENCES payments(id));
-CREATE TABLE notifications (id BIGINT IDENTITY(1,1) PRIMARY KEY, user_id BIGINT NOT NULL, message NVARCHAR(255) NOT NULL, link NVARCHAR(255), is_read BIT NOT NULL DEFAULT 0, created_at DATETIME NOT NULL DEFAULT GETDATE(), FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE);
+-- Reviews Table (UPDATED SCHEMA)
+CREATE TABLE reviews (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    order_item_id BIGINT UNIQUE NOT NULL,
+    catalogue_item_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    score INT NOT NULL,
+    comment NVARCHAR(MAX),
+    manager_reply NVARCHAR(MAX),
+    comment_status VARCHAR(50) NOT NULL DEFAULT 'VISIBLE', -- 'VISIBLE' or 'REMOVED'
+    review_date DATETIME NOT NULL DEFAULT GETDATE(),
+    FOREIGN KEY (order_item_id) REFERENCES order_items(id) ON DELETE CASCADE,
+    FOREIGN KEY (catalogue_item_id) REFERENCES catalogue_items(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
 GO
 
--- Inventory Tables (Separated)
+-- Other Core & Inventory Tables
+CREATE TABLE income (id BIGINT IDENTITY(1,1) PRIMARY KEY, payment_id BIGINT NOT NULL, amount FLOAT NOT NULL, income_type VARCHAR(50) NOT NULL, income_date DATE NOT NULL, FOREIGN KEY (payment_id) REFERENCES payments(id));
+CREATE TABLE manual_expenses (id BIGINT IDENTITY(1,1) PRIMARY KEY, description NVARCHAR(255) NOT NULL, amount FLOAT NOT NULL, expense_date DATE NOT NULL, category VARCHAR(50) NOT NULL);
+CREATE TABLE notifications (id BIGINT IDENTITY(1,1) PRIMARY KEY, user_id BIGINT NOT NULL, message NVARCHAR(255) NOT NULL, link NVARCHAR(255), is_read BIT NOT NULL DEFAULT 0, created_at DATETIME NOT NULL DEFAULT GETDATE(), FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE);
 CREATE TABLE inventory_categories (id BIGINT IDENTITY(1,1) PRIMARY KEY, name NVARCHAR(100) NOT NULL UNIQUE);
 CREATE TABLE suppliers (id BIGINT IDENTITY(1,1) PRIMARY KEY, name NVARCHAR(255) NOT NULL UNIQUE, contact_info NVARCHAR(255));
 CREATE TABLE inventory_items (id BIGINT IDENTITY(1,1) PRIMARY KEY, name NVARCHAR(255) NOT NULL UNIQUE, category_id BIGINT, measurement_unit NVARCHAR(50), low_stock_threshold FLOAT NOT NULL DEFAULT 0, current_quantity FLOAT NOT NULL DEFAULT 0, FOREIGN KEY (category_id) REFERENCES inventory_categories(id));
@@ -68,10 +83,9 @@ GO
 /* =================================================================
    3. INSERT MOCK DATA
    ================================================================= */
--- Roles
+-- Roles, Users, Categories, etc.
 INSERT INTO roles (name) VALUES ('ROLE_CUSTOMER'), ('ROLE_MANAGER'), ('ROLE_KITCHEN_SUPERVISOR'), ('ROLE_KITCHEN_STAFF'), ('ROLE_DELIVERY_PERSON'), ('ROLE_EVENT_COORDINATOR');
 GO
--- Users
 INSERT INTO users (username, email, password, first_name, last_name, address_line1, city, primary_phone_no, role_id) VALUES
 ('manager_user', 'manager@goldenflame.com', 'manager123', 'Manager', 'Account', '123 Restaurant St', 'Malabe', '0112233445', (SELECT id FROM roles WHERE name = 'ROLE_MANAGER')),
 ('customer_user', 'customer@example.com', 'customer123', 'John', 'Doe', '456 Customer Ave', 'Colombo', '0771234567', (SELECT id FROM roles WHERE name = 'ROLE_CUSTOMER')),
@@ -80,12 +94,9 @@ INSERT INTO users (username, email, password, first_name, last_name, address_lin
 ('kitchen_staff_user', 'staff@goldenflame.com', 'staff123', 'Kitchen', 'Staff', '123 Restaurant St', 'Malabe', '0112233447', (SELECT id FROM roles WHERE name = 'ROLE_KITCHEN_STAFF')),
 ('event_coord', 'event@goldenflame.com', 'event123', 'Emily', 'Carter', '123 Restaurant St', 'Malabe', '0112233448', (SELECT id FROM roles WHERE name = 'ROLE_EVENT_COORDINATOR'));
 GO
--- Menu & Event Categories
 INSERT INTO categories (name) VALUES ('Appetizer'), ('Soup'), ('Salad'), ('Main Course'), ('Dessert'), ('Beverage'), ('Milestone Parties'), ('Family & Life Events');
 GO
--- Inventory Categories
 INSERT INTO inventory_categories (name) VALUES ('Produce'), ('Dry Goods'), ('Meats'), ('Dairy');
 GO
--- Card
 INSERT INTO cards (card_number, cvc, expiry_month, expiry_year) VALUES ('5040705240328972', '123', 12, 2028);
 GO
